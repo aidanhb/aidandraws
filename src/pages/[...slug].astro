@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import PieceLayout from '../layouts/PieceLayout.astro';
+
+export async function getStaticPaths() {
+  const pieces = await getCollection('portfolio');
+  return pieces.map((piece) => ({
+    params: { slug: piece.slug },
+    props: { piece },
+  }));
+}
+
+const { piece } = Astro.props;
+const { Content } = await piece.render();
+---
+
+<PieceLayout piece={piece}>
+  <Content />
+</PieceLayout>

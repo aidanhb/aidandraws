@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import PortfolioGrid from '../components/PortfolioGrid.astro';
+import About from '../components/About.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout>
+  <Nav />
+
+  <main>
+    <Hero />
+
+    <section id="portfolio" class="py-16 scroll-mt-20">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <h2 class="text-h2 font-heading text-text-title uppercase mb-4">Portfolio</h2>
+        <p class="text-p1 font-body text-white mb-10 max-w-2xl">
+          A collection of fantasy illustrations, character designs, and concept art.
+        </p>
+        <PortfolioGrid />
+      </div>
+    </section>
+
+    <section id="about-me" class="py-16 scroll-mt-20">
+      <About />
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>

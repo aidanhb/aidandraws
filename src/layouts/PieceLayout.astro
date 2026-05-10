@@ -1,0 +1,48 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import FlipbookPDF from '../components/react/FlipbookPDF';
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  piece: CollectionEntry<'portfolio'>;
+}
+
+const { piece } = Astro.props;
+const { title, description, heroImage, alt, flipbook } = piece.data;
+---
+
+<BaseLayout title={`${title} | Aidan Holloway-Bidwell`} description={description}>
+  <Nav />
+
+  <main class="max-w-[1200px] mx-auto px-6 py-12">
+    <article>
+      <Image
+        src={heroImage}
+        alt={alt}
+        widths={[800, 1200]}
+        sizes="(max-width: 1200px) 100vw, 1200px"
+        class="w-full object-contain rounded-sm mb-10"
+      />
+
+      <h1 class="text-h1 font-heading text-text-title uppercase mb-4">{title}</h1>
+      <p class="text-p1 font-body text-white mb-10 max-w-2xl">{description}</p>
+
+      <div class="text-p2 font-body text-white/80 space-y-4 max-w-2xl leading-relaxed">
+        <slot />
+      </div>
+
+      {
+        flipbook && (
+          <div class="mt-16">
+            <FlipbookPDF pdfPath={flipbook} client:load />
+          </div>
+        )
+      }
+    </article>
+  </main>
+
+  <Footer />
+</BaseLayout>

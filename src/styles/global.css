@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background-color: #160912;
+  color: #ffffff;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Josefin Sans', sans-serif;
+  text-transform: uppercase;
+}
+
+a {
+  color: #c2ceff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+*:focus-visible {
+  outline: 2px solid #c2ceff;
+  outline-offset: 2px;
+}

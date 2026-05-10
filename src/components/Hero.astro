@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const allPieces = await getCollection('portfolio');
+const featured = allPieces
+  .filter((p) => p.data.featured)
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+---
+
+<section class="w-full bg-bg py-12">
+  {
+    featured.length > 0 ? (
+      <div class="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 [grid-auto-rows:340px]">
+        {featured.map((piece) => (
+          <a
+            href={`/${piece.slug}`}
+            class="block overflow-hidden group no-underline hover:no-underline relative"
+            aria-label={piece.data.title}
+          >
+            <Image
+              src={piece.data.heroImage}
+              alt={piece.data.alt}
+              width={600}
+              height={340}
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div class="absolute inset-0 bg-bg/0 group-hover:bg-bg/50 transition-colors duration-300 flex items-end p-4 opacity-0 group-hover:opacity-100">
+              <p class="text-text-title font-heading text-sm uppercase tracking-wider">
+                {piece.data.title}
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="max-w-[1200px] mx-auto px-6 py-24 text-center border border-dashed border-white/20 rounded">
+        <p class="text-p1 font-body text-white/30">
+          Featured illustrations will appear here — add pieces with <code class="text-text-secondary">featured: true</code> to your portfolio collection.
+        </p>
+      </div>
+    )
+  }
+</section>

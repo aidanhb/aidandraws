@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import PortfolioCard from './PortfolioCard.astro';
+
+const allPieces = await getCollection('portfolio');
+const sorted = allPieces.sort((a, b) => {
+  const aOrder = a.data.order ?? Infinity;
+  const bOrder = b.data.order ?? Infinity;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+  return a.data.title.localeCompare(b.data.title);
+});
+---
+
+{
+  sorted.length > 0 ? (
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 [grid-auto-rows:340px]">
+      {sorted.map((piece) => (
+        <PortfolioCard piece={piece} />
+      ))}
+    </div>
+  ) : (
+    <div class="py-24 text-center border border-dashed border-white/20 rounded">
+      <p class="text-p1 font-body text-white/30">
+        Portfolio pieces will appear here — add <code class="text-text-secondary">.md</code> files to{' '}
+        <code class="text-text-secondary">src/content/portfolio/</code>.
+      </p>
+    </div>
+  )
+}
