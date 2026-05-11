@@ -14,7 +14,7 @@ export default function ThemePicker({ portraits }: Props) {
 
   useEffect(() => {
     const sentinel = document.getElementById('portfolio');
-    if (!sentinel) return;
+    if (!sentinel) { setPastHero(true); return; }
     const check = () => setPastHero(sentinel.getBoundingClientRect().top < window.innerHeight * 0.9);
     window.addEventListener('scroll', check, { passive: true });
     check();

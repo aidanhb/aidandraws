@@ -23,11 +23,11 @@
 
 /* TODO: design palette */
 [data-theme="bard"] {
-  --color-bg:             #011e22;
-  --color-text:           #ffdcaf;
-  --color-text-title:     #ff8f87;
-  --color-text-link:      #aaffe5;
-  --color-text-secondary: #f8c2ff;
+  --color-bg:             #1c3639;
+  --color-text:           #ffedd5;
+  --color-text-title:     #ff6b51;
+  --color-text-link:      #3effdc;
+  --color-text-secondary: #f9ff55;
 }
 
 /* TODO: design palette */
@@ -51,7 +51,7 @@
 /* TODO: design palette */
 [data-theme="fighter"] {
   --color-bg:             #ede2f1;
-  --color-text:           #4d0aca;
+  --color-text:           #000000;
   --color-text-title:     #4c001b;
   --color-text-link:      #5d1475;
   --color-text-secondary: #6e0303;
@@ -123,13 +123,27 @@ body {
   font-family: 'Space Grotesk', sans-serif;
 }
 
+p + p {
+  margin-top: 1.25rem;
+}
+
+h1 { font-size: 4rem;   line-height: 1.2; }
+h2 { font-size: 3.8rem; line-height: 1.2; }
+h3 { font-size: 3rem;   line-height: 1.2; }
+h4 { font-size: 2.4rem; line-height: 1.2; }
+
 h1,
 h2,
 h3,
 h4 {
   font-family: 'Josefin Sans', sans-serif;
   text-transform: uppercase;
+  color: rgb(var(--color-text-title));
   transition: color 400ms ease;
+}
+
+h3 {
+  color: rgb(var(--color-text-link));
 }
 
 a {
@@ -149,4 +163,18 @@ figcaption {
 *:focus-visible {
   outline: 2px solid rgb(var(--color-text-link));
   outline-offset: 2px;
+}
+
+/* ─── Prose lists ────────────────────────────────────────────────────────── */
+
+ul, ol {
+  padding-left: 1.5rem;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
 }

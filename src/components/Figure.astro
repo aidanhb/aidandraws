@@ -14,7 +14,7 @@ const { src, alt, caption, widthHint = 'full' } = Astro.props;
 const isNarrow = widthHint === 'narrow';
 ---
 
-<figure class:list={['mx-auto mb-10', isNarrow ? 'max-w-[720px]' : 'max-w-[1200px]']}>
+<figure class:list={['mx-auto mb-6', isNarrow ? 'max-w-[720px]' : 'max-w-[1200px]']}>
   <Image
     src={src}
     alt={alt}

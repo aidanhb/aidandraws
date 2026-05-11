@@ -35,9 +35,9 @@ const { title, description, heroImage, alt, medium, dimensions, flipbook } = pie
         class="w-full object-contain mb-10"
       />
 
-      <p class="text-p1 font-body text-text mb-10 max-w-2xl">{description}</p>
+      <p class="text-p1 font-body text-text mb-10">{description}</p>
 
-      <div class="text-p2 font-body text-text/80 space-y-4 max-w-2xl leading-relaxed">
+      <div class="text-p2 font-body text-text space-y-4 leading-relaxed [&>p]:max-w-2xl [&>ul]:max-w-2xl [&>ol]:max-w-2xl [&>blockquote]:max-w-2xl">
         <slot />
       </div>
 

@@ -1,15 +1,13 @@
 ---
 title: Pecca Botan
-description: A fantasy battle scene with an armored warrior and a serpentine foe.
+medium: Acrylic & gouache on board
+dimensions: 28 x 18 in
+description: A fantasy forest painting for my MFA thesis.
 heroImage: ../../assets/portfolio/pecca-botan.webp
-alt: A mystical forest scene with a magical female figure sitting on a tree, surrounded by ferns and mushrooms, holding a staff with glowing symbols. She wears an elaborate headdress and has plant-like features. An owl is flying in front of her.
+alt: A panoramic forest scene in a deep valley or canyon. Leaf-clad forest dryad creatures stand observing the viewer, while other creatures glide down in propeller gliders.
 year: 2026
 tags: [fantasy, magic, forest]
 featured: true
 order: 4
+objectPosition: 20% 50%
 ---
-
-Long-form description, process notes, or commentary about the piece goes here.
-
-Renders as the body of the detail page at /bloodcliff-keep.
-Slug is derived from filename (bloodcliff-keep.md → /bloodcliff-keep), matching current Squarespace URL structure.

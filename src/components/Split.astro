@@ -1,0 +1,15 @@
+---
+interface Props {
+  reverse?: boolean;
+}
+const { reverse = false } = Astro.props;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start my-8">
+  <div class:list={[reverse && 'md:order-last']}>
+    <slot name="text" />
+  </div>
+  <div class:list={[reverse && 'md:order-first']}>
+    <slot name="figure" />
+  </div>
+</div>

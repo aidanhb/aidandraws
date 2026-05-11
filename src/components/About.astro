@@ -1,14 +1,17 @@
 ---
+import { Image } from 'astro:assets';
+import headshot from '../assets/about/headshot.webp';
 ---
 
 <div class="max-w-[1200px] mx-auto px-6">
+
+  <!-- Bio + photo -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
     <div>
       <h2 class="text-h2 font-heading text-text-title mb-8">hi! i'm aidan</h2>
 
       <div class="space-y-10">
         <div>
-          <h3 class="text-h4 font-heading text-text-title mb-4">my background</h3>
           <p class="text-p1 font-body text-text leading-relaxed">
             I grew up exploring the serene forests of Western Massachusetts. I've drawn ever since I
             was a kid.
@@ -25,14 +28,7 @@
         </div>
 
         <div>
-          <h3 class="text-h4 font-heading text-text-title mb-4">my goal</h3>
-          <p class="text-p1 font-body text-text leading-relaxed">
-            I aim to make fantasy feel as tangible as reality.
-          </p>
-        </div>
-
-        <div>
-          <h3 class="text-h4 font-heading text-text-title mb-4">contact</h3>
+          <h3 class="text-h4 font-heading mb-4">contact</h3>
           <a
             href="mailto:aidan@aidandraws.com"
             class="text-p1 font-body text-text-link hover:underline"
@@ -43,11 +39,67 @@
       </div>
     </div>
 
-    <!-- Replace this placeholder with <Image src={headshot} alt="Aidan Holloway-Bidwell" ... /> -->
-    <div
-      class="aspect-[3/4] bg-white/5 border border-dashed border-white/20 rounded flex items-center justify-center text-text/30 text-p2 font-body"
-    >
-      Headshot coming soon
+    <Image
+      src={headshot}
+      alt="Aidan Holloway-Bidwell"
+      widths={[600, 1200]}
+      sizes="(max-width: 1024px) 100vw, 600px"
+      class="w-full rounded"
+    />
+  </div>
+
+  <!-- My Work -->
+  <div class="mt-16 pt-16 border-t border-text/10">
+    <h3 class="text-h4 font-heading mb-6">my work</h3>
+    <div class="space-y-4">
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I've developed character sheets for private clients, as well as custom illustrations for
+        clients' Dungeons &amp; Dragons campaigns. My work has been shown at the <a href="https://societyillustrators.org/" target="_blank" rel="noopener noreferrer">Society of
+        Illustrators</a> and <a href="https://www.cqjournal.com/gallery/79/gallery/holloway-bidwell-aidan-113739-01" target="_blank" rel="noopener noreferrer">Creative Quarterly</a>. I've also tabled at the <a href="https://imaginativerealism.com/" target="_blank" rel="noopener noreferrer">IX Art Show (IlluxCon)</a> and
+        <a href="https://www.moccafest.org/" target="_blank" rel="noopener noreferrer">MoCCA Arts Fest</a>.
+      </p>
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I am experienced in acrylic painting as well as Photoshop, Illustrator, InDesign, After
+        Effects, Blender, Procreate, and Procreate Dreams.
+      </p>
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I'm always seeking to learn new tools and skills. I pride myself in communicating clearly
+        and professionally with my teammates and clients throughout a project.
+      </p>
     </div>
   </div>
+
+  <!-- My Goal -->
+  <div class="mt-16 pt-16 border-t border-text/10">
+    <h3 class="text-h4 font-heading mb-6">my goal</h3>
+    <div class="space-y-4">
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I aim to make fantasy feel as tangible as reality.
+      </p>
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I see each piece as a puzzle to solve. The client provides a number of oddly-shaped pieces:
+        the overarching theme; the essential characters and details such as garb and environment;
+        the moment in time to be depicted as well as the moments preceding and following it. It's up
+        to me to figure out how all these pieces fit together visually.
+      </p>
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I work primarily in acrylic paint. I build the painting up slowly, similar to oil, working
+        in gestural glazes before tightening up the essential details and areas of interest.
+        Occasionally, I'll augment the piece with colored pencil or a fine airbrushing of gouache.
+      </p>
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I take immense inspiration from the Golden Age illustrator N.C. Wyeth, as well as
+        contemporary painters like Ray Bonilla and Jesper Ejsing. These painters' sense of light
+        and shadow, direction of movement, and strong storytelling resonate with me. They provide my
+        stylistic guiding stars by which I navigate each project I undertake.
+      </p>
+      <p class="text-p1 font-body text-text leading-relaxed">
+        I'm currently fleshing out multiple science-fiction and fantasy worlds. Some are in
+        collaboration with clients, and some are personal projects born from my own imagination. In
+        all of them, I enjoy the balance of fleshing out impactful, action-oriented visuals with
+        fine-tuned attention to worldbuilding detail.
+      </p>
+    </div>
+  </div>
+
 </div>

@@ -28,12 +28,10 @@ const { piece } = Astro.props;
     <div>
       <p class="text-text-title font-heading text-sm uppercase tracking-wider">{piece.data.title}</p>
       {
-        piece.data.tags.length > 0 && (
-          <div class="flex gap-2 mt-1 flex-wrap">
-            {piece.data.tags.map((tag) => (
-              <span class="text-text-secondary text-xs">{tag}</span>
-            ))}
-          </div>
+        (piece.data.medium || piece.data.dimensions) && (
+          <p class="text-text-secondary text-xs mt-1">
+            {[piece.data.medium, piece.data.dimensions].filter(Boolean).join(' — ')}
+          </p>
         )
       }
     </div>
