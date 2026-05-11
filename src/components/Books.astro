@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import BookCard from './BookCard.astro';
+
+const allBooks = await getCollection('books');
+const books = allBooks.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999));
+---
+
+<div class="max-w-[1200px] mx-auto px-6">
+  <h2 class="text-h2 font-heading text-text-title uppercase mb-4">Books</h2>
+  <p class="text-p1 font-body text-text mb-10 max-w-2xl">
+    Storytelling is a passion of mine, especially worldbuilding. I like to explore themes of humanity and existential threats, balanced with humor and whimsy.
+  </p>
+  {books.length === 0 ? (
+    <p class="text-p1 font-body text-text max-w-2xl">Coming soon.</p>
+  ) : (
+    <div class="grid sm:=grid-cols-1 grid-cols-2 gap-8">
+      {books.map((book) => (
+        <BookCard
+          title={book.data.title}
+          description={book.data.description}
+          cover={book.data.cover}
+          alt={book.data.alt}
+          href={`/books/${book.slug}`}
+          year={book.data.year}
+          numPages={book.data.numPages}
+        />
+      ))}
+    </div>
+  )}
+</div>

@@ -1,0 +1,85 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import FlipbookPDF from '../components/react/FlipbookPDF';
+import { Image, getImage } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  book: CollectionEntry<'books'>;
+}
+
+const { book } = Astro.props;
+const { title, description, cover, alt, year, numPages, href } = book.data;
+
+// Collect page images from src/assets/books/{slug}/*.webp, sorted by filename.
+// The cover lives at src/assets/books/{slug}.webp (no subfolder) and is excluded
+// by the `/books/{slug}/` path filter below.
+const allBookImages = import.meta.glob<ImageMetadata>('../assets/books/**/*.webp', {
+  eager: true,
+  import: 'default',
+});
+
+const pageUrls = await Promise.all(
+  Object.entries(allBookImages)
+    .filter(([path]) => path.includes(`/books/${book.slug}/`))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(async ([, img]) => (await getImage({ src: img })).src),
+);
+---
+
+<BaseLayout title={`${title} | Aidan Holloway-Bidwell`} description={description}>
+  <Nav />
+
+  <main class="max-w-[1200px] mx-auto px-6 py-12">
+    <article>
+
+      <!-- Header: cover + metadata -->
+      <div class="flex flex-col sm:flex-row gap-8 items-start mb-12">
+        <div class="flex-none w-40 sm:w-48">
+          <Image
+            src={cover}
+            alt={alt}
+            class="w-full h-auto rounded shadow-md ring-1 ring-text/20"
+          />
+        </div>
+        <div class="flex-1 pt-1">
+          <h1 class="text-h2 font-heading text-text-title uppercase mb-2">{title}</h1>
+          {(year || numPages) && (
+            <p class="text-p3 font-body text-text-secondary mb-4">
+              {[year, numPages ? `${numPages} pages` : undefined].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          <p class="text-p1 font-body text-text max-w-2xl leading-relaxed">{description}</p>
+          {href && (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-block mt-6 text-p2 font-body text-text-link hover:underline"
+            >
+              View book →
+            </a>
+          )}
+        </div>
+      </div>
+
+      <!-- Flipbook -->
+      {pageUrls.length > 0 && (
+        <div class="mt-8">
+          <FlipbookPDF pages={pageUrls} alt={`${title} flipbook`} client:only="react" />
+        </div>
+      )}
+
+      <!-- Optional MDX body content (notes, credits, etc.) -->
+      <div class="mt-12 text-p2 font-body text-text space-y-4 leading-relaxed [&>p]:max-w-2xl [&>ul]:max-w-2xl [&>ol]:max-w-2xl">
+        <slot />
+      </div>
+
+    </article>
+  </main>
+
+  <Footer />
+</BaseLayout>

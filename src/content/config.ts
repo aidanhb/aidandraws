@@ -18,4 +18,18 @@ const portfolio = defineCollection({
   }),
 });
 
-export const collections = { portfolio };
+const books = defineCollection({
+  type: 'content',
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    description: z.string(),
+    cover: image(),
+    alt: z.string(),
+    href: z.string().optional(),
+    year: z.number().optional(),
+    numPages: z.number().optional(),
+    order: z.number().optional(),
+  }),
+});
+
+export const collections = { portfolio, books };
