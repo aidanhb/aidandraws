@@ -2,13 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Theme palettes ─────────────────────────────────────────────────────── */
+
+:root,
+[data-theme="wizard"] {
+  --color-bg:             #160912;
+  --color-text:           #ffffff;
+  --color-text-title:     #ffcf68;
+  --color-text-link:      #C2CEFF;
+  --color-text-secondary: #C2FFE1;
+}
+
+[data-theme="barbarian"] {
+  --color-bg:             #fbf0dc;
+  --color-text:           #00276a;
+  --color-text-title:     #8e0e00;
+  --color-text-link:      #00393d;
+  --color-text-secondary: #002b33;
+}
+
+/* TODO: design palette */
+[data-theme="bard"] {
+  --color-bg:             #011e22;
+  --color-text:           #ffdcaf;
+  --color-text-title:     #ff8f87;
+  --color-text-link:      #aaffe5;
+  --color-text-secondary: #f8c2ff;
+}
+
+/* TODO: design palette */
+[data-theme="cleric"] {
+  --color-bg:             #202324;
+  --color-text:           #ffffff;
+  --color-text-title:     #ffd59a;
+  --color-text-link:      #f9ad66;
+  --color-text-secondary: #cbe0ec;
+}
+
+/* TODO: design palette */
+[data-theme="druid"] {
+  --color-bg:             #001407;
+  --color-text:           #f1ffce;
+  --color-text-title:     #97ff77;
+  --color-text-link:      #68cf89;
+  --color-text-secondary: #eeff8c;
+}
+
+/* TODO: design palette */
+[data-theme="fighter"] {
+  --color-bg:             #ede2f1;
+  --color-text:           #4d0aca;
+  --color-text-title:     #4c001b;
+  --color-text-link:      #5d1475;
+  --color-text-secondary: #6e0303;
+}
+
+/* TODO: design palette */
+[data-theme="paladin"] {
+  --color-bg:             #ffffff;
+  --color-text:           #4c350a;
+  --color-text-title:     #cf8c17;
+  --color-text-link:      #324ebc;
+  --color-text-secondary: #277b24;
+}
+
+/* TODO: design palette */
+[data-theme="ranger"] {
+  --color-bg:             #ebd7b7;
+  --color-text:           #000000;
+  --color-text-title:     #2d1f0f;
+  --color-text-link:      #ae4126;
+  --color-text-secondary: #1e2b1b;
+}
+
+/* TODO: design palette */
+[data-theme="rogue"] {
+  --color-bg:             #ffffff;
+  --color-text:           #000000;
+  --color-text-title:     #f10000;
+  --color-text-link:      #0a5b0a;
+  --color-text-secondary: #252726;
+}
+
+/* TODO: design palette */
+[data-theme="sorcerer"] {
+  --color-bg:             #00022d;
+  --color-text:           #ff88b8;
+  --color-text-title:     #ff8800;
+  --color-text-link:      #c2fff3;
+  --color-text-secondary: #90ffeb;
+}
+
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+
 html {
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-text));
   scroll-behavior: smooth;
+  transition: background-color 400ms ease, color 400ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+    transition: none;
   }
 
   *,
@@ -20,8 +118,8 @@ html {
 }
 
 body {
-  background-color: #160912;
-  color: #ffffff;
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-text));
   font-family: 'Space Grotesk', sans-serif;
 }
 
@@ -31,18 +129,24 @@ h3,
 h4 {
   font-family: 'Josefin Sans', sans-serif;
   text-transform: uppercase;
+  transition: color 400ms ease;
 }
 
 a {
-  color: #c2ceff;
+  color: rgb(var(--color-text-link));
   text-decoration: none;
+  transition: color 400ms ease;
 }
 
 a:hover {
   text-decoration: underline;
 }
 
+figcaption {
+  transition: color 400ms ease;
+}
+
 *:focus-visible {
-  outline: 2px solid #c2ceff;
+  outline: 2px solid rgb(var(--color-text-link));
   outline-offset: 2px;
 }

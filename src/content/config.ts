@@ -11,7 +11,10 @@ const portfolio = defineCollection({
     tags: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     order: z.number().optional(),
+    medium: z.string().optional(),
+    dimensions: z.string().optional(),
     flipbook: z.string().optional(),
+    objectPosition: z.string().optional(),
   }),
 });
 

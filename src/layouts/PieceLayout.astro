@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { piece } = Astro.props;
-const { title, description, heroImage, alt, flipbook } = piece.data;
+const { title, description, heroImage, alt, medium, dimensions, flipbook } = piece.data;
 ---
 
 <BaseLayout title={`${title} | Aidan Holloway-Bidwell`} description={description}>
@@ -19,18 +19,25 @@ const { title, description, heroImage, alt, flipbook } = piece.data;
 
   <main class="max-w-[1200px] mx-auto px-6 py-12">
     <article>
+      <h1 class="text-h1 font-heading text-text-title uppercase mb-2">{title}</h1>
+
+      {(medium || dimensions) && (
+        <p class="text-p3 font-body text-text/50 mb-8">
+          {[medium, dimensions].filter(Boolean).join(' — ')}
+        </p>
+      )}
+
       <Image
         src={heroImage}
         alt={alt}
         widths={[800, 1200]}
         sizes="(max-width: 1200px) 100vw, 1200px"
-        class="w-full object-contain rounded-sm mb-10"
+        class="w-full object-contain mb-10"
       />
 
-      <h1 class="text-h1 font-heading text-text-title uppercase mb-4">{title}</h1>
-      <p class="text-p1 font-body text-white mb-10 max-w-2xl">{description}</p>
+      <p class="text-p1 font-body text-text mb-10 max-w-2xl">{description}</p>
 
-      <div class="text-p2 font-body text-white/80 space-y-4 max-w-2xl leading-relaxed">
+      <div class="text-p2 font-body text-text/80 space-y-4 max-w-2xl leading-relaxed">
         <slot />
       </div>
 

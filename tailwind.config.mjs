@@ -4,12 +4,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#160912',
+        bg: 'rgb(var(--color-bg) / <alpha-value>)',
         text: {
-          DEFAULT: '#FFFFFF',
-          title: '#FFE4A8',
-          link: '#C2CEFF',
-          secondary: '#C2FFE1',
+          DEFAULT: 'rgb(var(--color-text) / <alpha-value>)',
+          title: 'rgb(var(--color-text-title) / <alpha-value>)',
+          link: 'rgb(var(--color-text-link) / <alpha-value>)',
+          secondary: 'rgb(var(--color-text-secondary) / <alpha-value>)',
         },
       },
       fontFamily: {

@@ -1,0 +1,36 @@
+---
+title: Bloodcliff Keep
+description: A fantasy battle scene with an armored warrior and a serpentine foe.
+heroImage: ../../assets/portfolio/_example.png
+alt: Placeholder gradient image for the Bloodcliff Keep portfolio piece.
+year: 2024
+tags: [fantasy, battle]
+featured: true
+order: 1
+---
+
+import Figure from '../../components/Figure.astro';
+import placeholder from '../../assets/portfolio/_example.png';
+
+This is an example **MDX** portfolio piece. Delete or copy this file when adding a real piece.
+Use `.mdx` when you need `<Figure>` captions or other custom components; use plain `.md` for simple hero + prose pieces.
+
+### Step 1: ideation and sketching
+
+Process notes go here. Plain Markdown works for most prose.
+
+<Figure
+  src={placeholder}
+  alt="Placeholder gradient image representing early ideation sketches."
+  caption="Early ideation sketches for the temple structure and surrounding marine life."
+/>
+
+### Step 2: detail work
+
+Use `widthHint="narrow"` for process images that don't need to span the full width.
+
+<Figure
+  src={placeholder}
+  alt="Placeholder gradient image representing final detail work."
+  widthHint="narrow"
+/>

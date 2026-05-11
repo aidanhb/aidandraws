@@ -1,39 +1,46 @@
 ---
+import logoRaw from '../assets/svg/logo.svg?raw';
+import MobileMenu from './react/MobileMenu';
+
+const navLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'Portfolio', href: '/#portfolio' },
+  { label: 'About', href: '/#about-me' },
+];
 ---
 
-<nav class="sticky top-0 z-50 bg-bg/90 backdrop-blur-sm border-b border-white/10">
-  <div class="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
+<nav class="sticky top-0 z-50 bg-bg/30 backdrop-blur-md border-b border-white/10 relative">
+  <div class="w-full mx-auto px-10 py-2 flex items-center justify-between">
     <a
       href="/"
-      class="font-heading text-text-title text-xl uppercase tracking-widest no-underline hover:no-underline hover:text-white transition-colors"
+      class="flex items-center gap-3 no-underline hover:no-underline hover:opacity-80 transition-opacity"
       aria-label="Aidan Holloway-Bidwell — home"
     >
-      <!-- Replace with <img src="/logo.svg" alt="Aidan Draws" ...> when logo is ready -->
-      Aidan
+      <span
+        aria-hidden="true"
+        class="block h-16 text-text [&>svg]:h-full [&>svg]:w-auto"
+        set:html={logoRaw}
+      />
+      <div class="font-heading text-text uppercase leading-[0]">
+        <span class="text-3xl font-bold tracking-widest">Aidan</span><br>
+        <span class="text-[7.5pt] font-medium">Holloway&thinsp;-&thinsp;Bidwell</span>
+      </div>
     </a>
 
-    <ul class="flex items-center gap-6 list-none m-0 p-0">
+    <!-- Desktop nav -->
+    <ul class="hidden md:flex items-center gap-6 list-none m-0 p-0">
       <li>
-        <a
-          href="/"
-          class="font-body text-p3 text-text-link uppercase tracking-wider hover:text-white transition-colors no-underline hover:no-underline"
-        >
+        <a href="/" class="font-body text-p3 text-text tracking-wider hover:text-text-link transition-colors no-underline">
           Home
         </a>
       </li>
       <li>
-        <a
-          href="/#portfolio"
-          class="font-body text-p3 text-text-link uppercase tracking-wider hover:text-white transition-colors no-underline hover:no-underline"
-        >
+        <a href="/#portfolio" class="font-body text-p3 text-text tracking-wider hover:text-text-link transition-colors no-underline">
           Portfolio
         </a>
       </li>
       <li>
-        <a
-          href="/#about-me"
-          class="font-body text-p3 text-text-link uppercase tracking-wider hover:text-white transition-colors no-underline hover:no-underline"
-        >
+        <a href="/#about-me" class="font-body text-p3 text-text tracking-wider hover:text-text-link transition-colors no-underline">
           About
         </a>
       </li>
@@ -43,20 +50,9 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Instagram"
-          class="text-text-link hover:text-white transition-colors flex items-center"
+          class="text-text-link hover:text-text transition-colors flex items-center"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
             <circle cx="12" cy="12" r="4"></circle>
             <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"></circle>
@@ -67,25 +63,42 @@
         <a
           href="mailto:aidan@aidandraws.com"
           aria-label="Email"
-          class="text-text-link hover:text-white transition-colors flex items-center"
+          class="text-text-link hover:text-text transition-colors flex items-center"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2" y="4" width="20" height="16" rx="2"></rect>
             <polyline points="2,4 12,13 22,4"></polyline>
           </svg>
         </a>
       </li>
     </ul>
+
+    <!-- Mobile: hamburger + social icons -->
+    <div class="flex md:hidden items-center gap-4">
+      <MobileMenu links={navLinks} client:load />
+      <a
+        href="https://www.instagram.com/aidan_thats_me/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+        class="text-text-link hover:text-text transition-colors flex items-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <circle cx="12" cy="12" r="4"></circle>
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"></circle>
+        </svg>
+      </a>
+      <a
+        href="mailto:aidan@aidandraws.com"
+        aria-label="Email"
+        class="text-text-link hover:text-text transition-colors flex items-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <polyline points="2,4 12,13 22,4"></polyline>
+        </svg>
+      </a>
+    </div>
   </div>
 </nav>

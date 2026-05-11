@@ -1,12 +1,13 @@
 ---
 title: Bloodcliff Keep
 description: A fantasy battle scene with an armored warrior and a serpentine foe.
-heroImage: ../../assets/portfolio/_example.png
+heroImage: ../../assets/portfolio/bloodcliff-keep.webp
 alt: A fierce armored warrior wielding a double-edged axe engages a snake-like creature in armor.
 year: 2024
 tags: [fantasy, battle]
 featured: true
-order: 1
+order: 2
+objectPosition: 50% 60%
 ---
 
 Long-form description, process notes, or commentary about the piece goes here.

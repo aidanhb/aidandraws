@@ -15,27 +15,59 @@ npm run preview # preview build locally
 
 ## Adding a new portfolio piece
 
-1. Create `src/content/portfolio/your-piece-name.md` (filename becomes the URL slug, e.g. `bloodcliff-keep.md` → `/bloodcliff-keep`)
-2. Add the high-res image to `src/assets/portfolio/`
-3. Fill in the frontmatter — all fields with their types:
+### Use `.md` or `.mdx`?
+
+| Format | When to use |
+|---|---|
+| `.md` | Simple pieces — hero image + plain prose, no custom components |
+| `.mdx` | When you need `<Figure>` captions, `<FlipbookPDF>`, or any other custom component |
+
+Both formats use identical frontmatter and produce identical detail pages. The only difference is MDX lets you import and use Astro/React components inline.
+
+### Steps
+
+1. Create `src/content/portfolio/your-piece-name.md` (or `.mdx`) — the filename becomes the URL slug
+2. Add the hero image (and any process images) to `src/assets/portfolio/`
+3. Fill in the frontmatter:
 
 ```md
 ---
-title: Bloodcliff Keep          # required — displayed as heading
+title: Bloodcliff Keep          # required
 description: Short description  # required — used as meta description
-heroImage: ../../assets/portfolio/bloodcliff-keep.jpg  # required — path relative to this file
+heroImage: ../../assets/portfolio/bloodcliff-keep.jpg  # required — relative to this file
 alt: Descriptive alt text       # required — enforced by TypeScript
 year: 2024                      # optional
 tags: [fantasy, battle]         # optional — shown on card hover
-featured: true                  # optional — appears in the Hero section at top of page
-order: 1                        # optional — controls sort order in grid (lower = earlier)
-flipbook: /pdfs/bloodcliff.pdf  # optional — enables the PDF flipbook viewer on the detail page
+featured: true                  # optional — appears in the hero carousel
+order: 1                        # optional — sort order in grid (lower = earlier)
+objectPosition: "50% 30%"       # optional — CSS object-position for carousel crop anchor
+flipbook: /pdfs/bloodcliff.pdf  # optional — enables the PDF flipbook viewer
 ---
 
-Long-form text about the piece goes here. Supports full Markdown.
+Plain Markdown body goes here.
 ```
 
-4. The piece automatically appears in the portfolio grid and gets a detail page.
+4. For `.mdx` files, add imports **after** the frontmatter closing `---`:
+
+```mdx
+---
+# ...frontmatter...
+---
+
+import Figure from '../../components/Figure.astro';
+import sketchImg from '../../assets/portfolio/my-piece/sketch.png';
+
+Prose goes here...
+
+<Figure
+  src={sketchImg}
+  alt="Descriptive alt text."
+  caption="Optional caption in mint."
+  widthHint="narrow"
+/>
+```
+
+5. The piece automatically appears in the portfolio grid and gets a detail page.
 
 ## File structure
 
@@ -83,6 +115,35 @@ Replace the "Aidan" text placeholder in `src/components/Nav.astro` with:
 ```astro
 <img src="/logo.svg" alt="Aidan Draws" class="h-8 w-auto" />
 ```
+
+## Themes
+
+The site ships with a character-class theme switcher (palette icon, bottom-right of every page). Users can pick a color palette and their choice is persisted in `localStorage`.
+
+### Adding or editing a theme
+
+1. Add a `[data-theme="your-id"]` block to `src/styles/global.css` with the four CSS variables:
+
+```css
+[data-theme="your-id"] {
+  --color-bg: #...;
+  --color-text-title: #...;   /* headings — cream-ish */
+  --color-text-link: #...;    /* links / interactive — periwinkle-ish */
+  --color-text-secondary: #...; /* accents / tags / captions — mint-ish */
+}
+```
+
+2. Add an entry to `THEMES` in `src/lib/themes.ts`:
+
+```ts
+{ id: 'your-id', label: 'Your Label' },
+```
+
+3. Add a portrait image at `src/assets/themes/your-id.webp` — it shows as the thumbnail in the picker.
+
+**Note:** Body text color (`#ffffff`) is intentionally constant across all themes for accessibility. Only `--color-bg` and the three accent variables change.
+
+**Contrast:** Before shipping a new palette, verify WCAG AA contrast (≥ 4.5:1 for body text, ≥ 3:1 for large text/UI) using [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/).
 
 ## Deployment
 
