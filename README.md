@@ -107,7 +107,10 @@ const raw = import.meta.glob<ImageMetadata>('../assets/books/**/*.webp', {
 });
 const pageUrls = await Promise.all(
   Object.entries(raw)
-    .filter(([p]) => p.includes(`/books/${book.slug}/`))
+    .filter(([p]) => {
+      const filename = p.split('/').pop() ?? '';
+      return p.includes(`/books/${book.slug}/`) && filename.startsWith('page-');
+    })
     .sort(([a], [b]) => a.localeCompare(b))
     .map(async ([, img]) => (await getImage({ src: img })).src),
 );

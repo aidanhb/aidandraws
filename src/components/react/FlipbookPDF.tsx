@@ -64,7 +64,7 @@ const FlipPage = React.forwardRef<
       onLoad={onLoad}
       onError={onError}
       style={{
-        width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+        width: '100%', height: '100%', objectFit: 'fill', display: 'block',
         opacity: loaded ? 1 : 0, transition: 'opacity 0.2s',
       }}
     />
@@ -150,8 +150,6 @@ export default function FlipbookPDF({
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
-      // Only intercept if the flipbook region is focused or a descendant is focused
-      if (!containerRef.current?.contains(document.activeElement) && document.activeElement !== containerRef.current) return;
       e.preventDefault();
       if (reducedMotion) {
         const totalSpreads = isTwoPage ? Math.ceil(pages.length / 2) : pages.length;
@@ -185,7 +183,7 @@ export default function FlipbookPDF({
       : [fadePage];
 
     return (
-      <div ref={containerRef} role="region" aria-label={alt} tabIndex={0} style={{ outline: 'none' }}>
+      <div ref={containerRef} role="region" aria-label={alt} tabIndex={-1} style={{ outline: 'none' }}>
         <span className="sr-only" aria-live="polite">
           {isTwoPage
             ? `Pages ${fadePage * 2 + 1}–${Math.min(fadePage * 2 + 2, pages.length)} of ${pages.length}`
@@ -242,14 +240,33 @@ export default function FlipbookPDF({
   }
 
   // ── Flip animation viewer ─────────────────────────────────────────────────
-  const displayLabel = isTwoPage
-    ? `${currentPage + 1}–${Math.min(currentPage + 2, pages.length)} / ${pages.length}`
-    : `${currentPage + 1} / ${pages.length}`;
+  const FLIP_MS = 700;
+
+  // In two-page mode, showCover renders the first/last pages as single pages on
+  // the right/left half of the spread respectively. Shift the book so the visible
+  // page is always centered in the container.
+  const shiftX = isTwoPage
+    ? currentPage === 0
+      ? -pageWidth / 2
+      : currentPage === pages.length - 1
+        ? pageWidth / 2
+        : 0
+    : 0;
+
+  const displayLabel =
+    currentPage === 0
+      ? 'Front Cover'
+      : currentPage === pages.length - 1
+        ? 'Back Cover'
+        : isTwoPage
+          ? `${currentPage + 1}–${Math.min(currentPage + 2, pages.length - 1)} / ${pages.length - 2}`
+          : `${currentPage} / ${pages.length - 2}`;
 
   return (
-    <div ref={containerRef} role="region" aria-label={alt} tabIndex={0} style={{ outline: 'none' }}>
+    <div ref={containerRef} role="region" aria-label={alt} tabIndex={-1} style={{ outline: 'none' }}>
       <span className="sr-only" aria-live="polite">{displayLabel}</span>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div style={{ overflow: 'hidden', touchAction: 'pan-y' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', transform: `translateX(${shiftX}px)`, transition: `transform 400ms ease` }}>
         <HTMLFlipBook
           key={isTwoPage ? 'two' : 'one'}
           ref={bookRef}
@@ -258,9 +275,9 @@ export default function FlipbookPDF({
           size="fixed"
           startPage={currentPage}
           usePortrait={!isTwoPage}
-          drawShadow
-          flippingTime={700}
-          showCover={false}
+          drawShadow={true}
+          flippingTime={FLIP_MS}
+          showCover={true}
           mobileScrollSupport
           clickEventForward={false}
           showPageCorners
@@ -292,6 +309,7 @@ export default function FlipbookPDF({
             />
           ))}
         </HTMLFlipBook>
+        </div>
       </div>
       <Controls
         label={displayLabel}

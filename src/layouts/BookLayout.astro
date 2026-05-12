@@ -14,9 +14,8 @@ interface Props {
 const { book } = Astro.props;
 const { title, description, cover, alt, year, numPages, href } = book.data;
 
-// Collect page images from src/assets/books/{slug}/*.webp, sorted by filename.
-// The cover lives at src/assets/books/{slug}.webp (no subfolder) and is excluded
-// by the `/books/{slug}/` path filter below.
+// Collect flipbook pages from src/assets/books/{slug}/*.webp, sorted by filename.
+// All images in the subfolder are included — name them so alphabetical order matches reading order.
 const allBookImages = import.meta.glob<ImageMetadata>('../assets/books/**/*.webp', {
   eager: true,
   import: 'default',
@@ -38,7 +37,7 @@ const pageUrls = await Promise.all(
 
       <!-- Header: cover + metadata -->
       <div class="flex flex-col sm:flex-row gap-8 items-start mb-12">
-        <div class="flex-none w-40 sm:w-48">
+        <div class="w-full sm:flex-none sm:w-48">
           <Image
             src={cover}
             alt={alt}
@@ -46,23 +45,13 @@ const pageUrls = await Promise.all(
           />
         </div>
         <div class="flex-1 pt-1">
-          <h1 class="text-h2 font-heading text-text-title uppercase mb-2">{title}</h1>
+          <h1 class="text-h4 md:text-h2 font-heading text-text-title uppercase mb-2">{title}</h1>
           {(year || numPages) && (
             <p class="text-p3 font-body text-text-secondary mb-4">
               {[year, numPages ? `${numPages} pages` : undefined].filter(Boolean).join(' · ')}
             </p>
           )}
           <p class="text-p1 font-body text-text max-w-2xl leading-relaxed">{description}</p>
-          {href && (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-block mt-6 text-p2 font-body text-text-link hover:underline"
-            >
-              View book →
-            </a>
-          )}
         </div>
       </div>
 
@@ -74,7 +63,7 @@ const pageUrls = await Promise.all(
       )}
 
       <!-- Optional MDX body content (notes, credits, etc.) -->
-      <div class="mt-12 text-p2 font-body text-text space-y-4 leading-relaxed [&>p]:max-w-2xl [&>ul]:max-w-2xl [&>ol]:max-w-2xl">
+      <div class="mt-12 text-p2 font-body text-text space-y-4 leading-relaxed">
         <slot />
       </div>
 
