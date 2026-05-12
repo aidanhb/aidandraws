@@ -24,6 +24,17 @@ const hexColorChannels = {
 export default defineConfig({
   integrations: [tailwind(), react(), mdx()],
   vite: {
+    server: {
+      host: true,
+      allowedHosts: [
+        'localhost',
+        '127.0.0.1',
+        '.ngrok-free.dev',   // matches *.ngrok-free.dev (free tier)
+        '.ngrok-free.app',   // matches *.ngrok-free.app (free tier alt)
+        '.ngrok.io',         // matches *.ngrok.io (paid tier)
+        'image-upturned-skyward.ngrok-free.dev',
+      ],
+    },
     css: {
       postcss: {
         plugins: [hexColorChannels],

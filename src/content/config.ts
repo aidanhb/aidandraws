@@ -25,7 +25,6 @@ const books = defineCollection({
     description: z.string(),
     cover: image(),
     alt: z.string(),
-    href: z.string().optional(),
     year: z.number().optional(),
     numPages: z.number().optional(),
     order: z.number().optional(),

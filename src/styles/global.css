@@ -127,6 +127,12 @@ p + p {
   margin-top: 1.25rem;
 }
 
+/* Inside a grid, sibling paragraphs may sit in different columns — rely on the
+   grid's gap for spacing rather than the consecutive-paragraph margin. */
+.grid > p + p {
+  margin-top: 0;
+}
+
 h1 { font-size: 4rem;   line-height: 1.2; }
 h2 { font-size: 3.8rem; line-height: 1.2; }
 h3 { font-size: 3rem;   line-height: 1.2; }

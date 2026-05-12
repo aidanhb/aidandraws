@@ -3,34 +3,20 @@
  *
  * IMPORTANT: always hydrate with client:only="react" — this component cannot SSR.
  *
- * Passing images from Astro (getImage pattern):
+ * Pages are typed via `FlipbookPage` (src/lib/flipbook-types.ts); load them with
+ * `loadFlipbook(slug)` from src/lib/load-flipbook.ts in your .astro file:
  *
- *   // In BookLayout.astro (runs at build time, not in the browser):
- *   import { getImage } from 'astro:assets';
- *   import type { ImageMetadata } from 'astro';
- *
- *   const raw = import.meta.glob<ImageMetadata>('../assets/books/**\/*.webp', {
- *     eager: true,
- *     import: 'default',
- *   });
- *   const pageUrls = await Promise.all(
- *     Object.entries(raw)
- *       .filter(([p]) => p.includes(`/books/${book.slug}/`))
- *       .sort(([a], [b]) => a.localeCompare(b))
- *       .map(async ([, img]) => (await getImage({ src: img })).src),
- *   );
- *
- *   // In the template:
- *   <FlipbookPDF pages={pageUrls} alt="Book title" client:only="react" />
+ *   const pages = await loadFlipbook(slug);
+ *   <FlipbookPDF pages={pages} alt="My flipbook" client:only="react" />
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
+import type { FlipbookPage } from '../../lib/flipbook-types';
 
 export interface FlipbookProps {
-  pages: string[];
+  pages: FlipbookPage[];
   alt: string;
-  pageAlts?: string[];
   startPage?: number;
   /** width / height ratio of one page — default 3/4 (portrait) */
   aspectRatio?: number;
@@ -42,7 +28,7 @@ const FlipPage = React.forwardRef<
   HTMLDivElement,
   { src: string; alt: string; loaded: boolean; error: boolean; onLoad: () => void; onError: () => void }
 >(({ src, alt, loaded, error, onLoad, onError }, ref) => (
-  <div ref={ref} style={{ position: 'relative', overflow: 'hidden', backgroundColor: 'rgb(var(--color-bg))' }}>
+  <div ref={ref} style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#fff', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
     {!loaded && !error && (
       <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgb(var(--color-text) / 0.06)' }} />
     )}
@@ -83,10 +69,76 @@ const BTN: React.CSSProperties = {
   transition: 'border-color 150ms, opacity 150ms',
 };
 
+function Lightbox({
+  page, label, onClose, onPrev, onNext,
+}: {
+  page: FlipbookPage;
+  label: string | null;
+  onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+}) {
+  const navBtn: React.CSSProperties = {
+    background: 'rgb(0 0 0 / 0.4)',
+    border: '1px solid rgb(255 255 255 / 0.4)',
+    color: 'white',
+    borderRadius: '999px',
+    width: '2.75rem',
+    height: '2.75rem',
+    fontSize: '1.25rem',
+    lineHeight: 1,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+  return (
+    <div
+      role="dialog" aria-modal="true" aria-label={page.alt}
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0,
+        background: 'rgb(0 0 0 / 0.85)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, padding: '2rem',
+      }}
+    >
+      <img
+        src={page.src} alt={page.alt}
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: 'min(90vw, 1200px)', maxHeight: '90vh', objectFit: 'contain', display: 'block' }}
+      />
+      <button
+        type="button" onClick={onClose} aria-label="Close"
+        style={{ ...navBtn, position: 'absolute', top: '1rem', right: '1rem' }}
+      >×</button>
+      {onPrev && (
+        <button
+          type="button" onClick={(e) => { e.stopPropagation(); onPrev(); }} aria-label="Previous page"
+          style={{ ...navBtn, position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }}
+        >←</button>
+      )}
+      {onNext && (
+        <button
+          type="button" onClick={(e) => { e.stopPropagation(); onNext(); }} aria-label="Next page"
+          style={{ ...navBtn, position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)' }}
+        >→</button>
+      )}
+      {label && (
+        <div style={{
+          position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)',
+          color: 'white', fontSize: '0.875rem', background: 'rgb(0 0 0 / 0.4)',
+          padding: '0.25rem 0.75rem', borderRadius: '999px',
+        }}>{label}</div>
+      )}
+    </div>
+  );
+}
+
 function Controls({
   label, onPrev, onNext, disablePrev, disableNext,
 }: {
-  label: string; onPrev: () => void; onNext: () => void;
+  label: string | null; onPrev: () => void; onNext: () => void;
   disablePrev: boolean; disableNext: boolean;
 }) {
   return (
@@ -95,9 +147,11 @@ function Controls({
         onClick={onPrev} disabled={disablePrev} aria-label="Previous page"
         style={{ ...BTN, opacity: disablePrev ? 0.35 : 1, cursor: disablePrev ? 'default' : 'pointer' }}
       >←</button>
-      <span style={{ color: 'rgb(var(--color-text-secondary))', fontSize: '0.875rem', minWidth: '5.5rem', textAlign: 'center' }}>
-        {label}
-      </span>
+      {label !== null && (
+        <span style={{ color: 'rgb(var(--color-text-secondary))', fontSize: '0.875rem', minWidth: '5.5rem', textAlign: 'center' }}>
+          {label}
+        </span>
+      )}
       <button
         onClick={onNext} disabled={disableNext} aria-label="Next page"
         style={{ ...BTN, opacity: disableNext ? 0.35 : 1, cursor: disableNext ? 'default' : 'pointer' }}
@@ -109,23 +163,91 @@ function Controls({
 export default function FlipbookPDF({
   pages,
   alt,
-  pageAlts = [],
   startPage = 0,
   aspectRatio = 3 / 4,
 }: FlipbookProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   // react-pageflip types its own ref as `any`
   const bookRef = useRef<any>(null);
+  // Tracks whether the most recent focus came from a pointer (touch/click) vs keyboard.
+  // Pointer-initiated focus is immediately blurred to prevent mobile scroll-to-view;
+  // keyboard (tab) focus is kept so arrow-key navigation works.
+  const pointerActivatedRef = useRef(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const [currentPage, setCurrentPage] = useState(startPage);
   const [loadedSet, setLoadedSet] = useState<Set<number>>(new Set());
   const [errorSet, setErrorSet] = useState<Set<number>>(new Set());
   const [reducedMotion, setReducedMotion] = useState(false);
   const [fadePage, setFadePage] = useState(startPage);
+  const [view, setView] = useState<'book' | 'grid'>('book');
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
+  // Visual "bed" around the book — gives a frame even when only the cover is showing.
+  const BED_PAD = 16;
   const isTwoPage = containerWidth >= 768;
-  const pageWidth = isTwoPage ? Math.floor(containerWidth / 2) : containerWidth;
+  const usableWidth = Math.max(0, containerWidth - 2 * BED_PAD);
+  const pageWidth = isTwoPage ? Math.floor(usableWidth / 2) : usableWidth;
   const pageHeight = pageWidth > 0 ? Math.floor(pageWidth / aspectRatio) : 0;
+
+  // Per-page numbering: contentNumbers[i] is the 1-based index among content-typed pages,
+  // or 0 for non-content pages. totalContent is the total count of content-typed pages.
+  const { contentNumbers, totalContent } = useMemo(() => {
+    const nums: number[] = [];
+    let running = 0;
+    for (const p of pages) {
+      if (p.type === 'content') running += 1;
+      nums.push(p.type === 'content' ? running : 0);
+    }
+    return { contentNumbers: nums, totalContent: running };
+  }, [pages]);
+
+  // Visible label for a single page index. Non-content non-cover pages (endpaper,
+  // frontmatter, backmatter, blank) show "- / total" so the indicator stays anchored
+  // and the running total is always visible.
+  const pageLabel = useCallback((i: number): string | null => {
+    const p = pages[i];
+    if (!p) return null;
+    if (p.type === 'content') return `${contentNumbers[i]} / ${totalContent}`;
+    if (p.type === 'cover') return 'Cover';
+    return `- / ${totalContent}`;
+  }, [pages, contentNumbers, totalContent]);
+
+  // Visible label for a spread (one or two pages).
+  const spreadLabel = useCallback((leftIdx: number, rightIdx?: number): string | null => {
+    const left = pages[leftIdx];
+    const right = rightIdx != null ? pages[rightIdx] : undefined;
+    if (!left) return null;
+    if (!right) return pageLabel(leftIdx);
+    const leftL = pageLabel(leftIdx);
+    const rightL = pageLabel(rightIdx!);
+    if (left.type === 'content' && right.type === 'content') {
+      return `${contentNumbers[leftIdx]}–${contentNumbers[rightIdx!]} / ${totalContent}`;
+    }
+    if (left.type === 'content') return leftL;
+    if (right.type === 'content') return rightL;
+    return leftL ?? rightL;
+  }, [pages, contentNumbers, totalContent, pageLabel]);
+
+  // Screen-reader announcement — always returns a meaningful string (alt text for
+  // non-content non-cover pages, "Page X of Y" for content).
+  const spreadAnnouncement = useCallback((leftIdx: number, rightIdx?: number): string => {
+    const announceOne = (i: number): string => {
+      const p = pages[i];
+      if (!p) return '';
+      if (p.type === 'content') return `Page ${contentNumbers[i]} of ${totalContent}`;
+      if (p.type === 'cover') return 'Cover';
+      return p.alt;
+    };
+    if (rightIdx == null || !pages[rightIdx]) return announceOne(leftIdx);
+    const left = pages[leftIdx];
+    const right = pages[rightIdx];
+    if (left.type === 'content' && right.type === 'content') {
+      return `Pages ${contentNumbers[leftIdx]} to ${contentNumbers[rightIdx]} of ${totalContent}`;
+    }
+    if (left.type === 'content') return announceOne(leftIdx);
+    if (right.type === 'content') return announceOne(rightIdx);
+    return announceOne(leftIdx);
+  }, [pages, contentNumbers, totalContent]);
 
   // ResizeObserver — measure the container, not the window
   useEffect(() => {
@@ -135,6 +257,31 @@ export default function FlipbookPDF({
     const ro = new ResizeObserver((entries) => setContainerWidth(entries[0].contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
+  }, []);
+
+  // Block vertical-scroll gestures from triggering page flips.
+  // touch-action:pan-y prevents touchmove from firing for vertical gestures (browser owns
+  // the scroll), but touchstart/touchend still fire — react-pageflip interprets that as a
+  // tap/flip. Capture-phase touchend intercepts before react-pageflip's bubble handlers.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let startX = 0, startY = 0;
+    const onStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+    const onEnd = (e: TouchEvent) => {
+      const dx = Math.abs(e.changedTouches[0].clientX - startX);
+      const dy = Math.abs(e.changedTouches[0].clientY - startY);
+      if (dy > dx) e.stopPropagation();
+    };
+    el.addEventListener('touchstart', onStart, { capture: true, passive: true });
+    el.addEventListener('touchend', onEnd, { capture: true, passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onStart, { capture: true });
+      el.removeEventListener('touchend', onEnd, { capture: true, passive: true } as EventListenerOptions);
+    };
   }, []);
 
   // prefers-reduced-motion
@@ -149,6 +296,13 @@ export default function FlipbookPDF({
   // Keyboard navigation — arrow keys + Home/End
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
+      if (lightboxIdx !== null) {
+        if (e.key === 'Escape') { e.preventDefault(); setLightboxIdx(null); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); setLightboxIdx((i) => i === null ? null : Math.max(i - 1, 0)); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); setLightboxIdx((i) => i === null ? null : Math.min(i + 1, pages.length - 1)); }
+        return;
+      }
+      if (view !== 'book') return;
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
       e.preventDefault();
       if (reducedMotion) {
@@ -170,7 +324,15 @@ export default function FlipbookPDF({
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [pages.length, reducedMotion, isTwoPage]);
+  }, [pages.length, reducedMotion, isTwoPage, view, lightboxIdx]);
+
+  // Lock body scroll while lightbox is open
+  useEffect(() => {
+    if (lightboxIdx === null) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [lightboxIdx]);
 
   const markLoaded = useCallback((i: number) => setLoadedSet((p) => new Set([...p, i])), []);
   const markError  = useCallback((i: number) => setErrorSet((p)  => new Set([...p, i])), []);
@@ -178,29 +340,30 @@ export default function FlipbookPDF({
   // ── Reduced-motion: cross-fade single-spread viewer ───────────────────────
   if (reducedMotion) {
     const totalSpreads = isTwoPage ? Math.ceil(pages.length / 2) : pages.length;
-    const spread = isTwoPage
-      ? [fadePage * 2, fadePage * 2 + 1].filter((i) => i < pages.length)
-      : [fadePage];
+    const leftIdx = isTwoPage ? fadePage * 2 : fadePage;
+    const rightIdx = isTwoPage && fadePage * 2 + 1 < pages.length ? fadePage * 2 + 1 : undefined;
+    const spreadIndices = rightIdx != null ? [leftIdx, rightIdx] : [leftIdx];
 
     return (
-      <div ref={containerRef} role="region" aria-label={alt} tabIndex={-1} style={{ outline: 'none' }}>
+      <div ref={containerRef} role="region" aria-label={alt} tabIndex={0}
+      onPointerDown={() => { pointerActivatedRef.current = true; }}
+      onFocus={(e) => { if (pointerActivatedRef.current) { pointerActivatedRef.current = false; e.currentTarget.blur(); } }}
+      style={{ outline: 'none' }}>
         <span className="sr-only" aria-live="polite">
-          {isTwoPage
-            ? `Pages ${fadePage * 2 + 1}–${Math.min(fadePage * 2 + 2, pages.length)} of ${pages.length}`
-            : `Page ${fadePage + 1} of ${pages.length}`}
+          {spreadAnnouncement(leftIdx, rightIdx)}
         </span>
         <div style={{ display: 'flex', gap: '2px', width: '100%' }}>
-          {spread.map((idx) => (
+          {spreadIndices.map((idx) => (
             <img
               key={idx}
-              src={pages[idx]}
-              alt={pageAlts[idx] ?? `${alt}, page ${idx + 1}`}
+              src={pages[idx].src}
+              alt={pages[idx].alt}
               style={{ flex: 1, width: 0, display: 'block', objectFit: 'cover', borderRadius: '2px', transition: 'opacity 300ms ease' }}
             />
           ))}
         </div>
         <Controls
-          label={`${fadePage + 1} / ${totalSpreads}`}
+          label={spreadLabel(leftIdx, rightIdx)}
           onPrev={() => setFadePage((p) => Math.max(p - 1, 0))}
           onNext={() => setFadePage((p) => Math.min(p + 1, totalSpreads - 1))}
           disablePrev={fadePage === 0}
@@ -213,8 +376,8 @@ export default function FlipbookPDF({
             View all pages
           </summary>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '0.75rem' }}>
-            {pages.map((src, i) => (
-              <img key={i} src={src} alt={pageAlts[i] ?? `${alt}, page ${i + 1}`}
+            {pages.map((page, i) => (
+              <img key={i} src={page.src} alt={page.alt}
                 style={{ width: '80px', height: 'auto', borderRadius: '2px' }} />
             ))}
           </div>
@@ -253,19 +416,55 @@ export default function FlipbookPDF({
         : 0
     : 0;
 
-  const displayLabel =
-    currentPage === 0
-      ? 'Front Cover'
-      : currentPage === pages.length - 1
-        ? 'Back Cover'
-        : isTwoPage
-          ? `${currentPage + 1}–${Math.min(currentPage + 2, pages.length - 1)} / ${pages.length - 2}`
-          : `${currentPage} / ${pages.length - 2}`;
+  // The visible flip spread is either a single page (cover alone at start/end in two-page
+  // showCover mode, or any page in one-page mode) or a two-page spread.
+  const flipRightIdx = isTwoPage && currentPage !== 0 && currentPage !== pages.length - 1
+    ? currentPage + 1
+    : undefined;
+  const visibleLabel = spreadLabel(currentPage, flipRightIdx);
+  const announcement = spreadAnnouncement(currentPage, flipRightIdx);
 
   return (
-    <div ref={containerRef} role="region" aria-label={alt} tabIndex={-1} style={{ outline: 'none' }}>
-      <span className="sr-only" aria-live="polite">{displayLabel}</span>
-      <div style={{ overflow: 'hidden', touchAction: 'pan-y' }}>
+    <div ref={containerRef} role="region" aria-label={alt} tabIndex={0}
+      onPointerDown={() => { pointerActivatedRef.current = true; }}
+      onFocus={(e) => { if (pointerActivatedRef.current) { pointerActivatedRef.current = false; e.currentTarget.blur(); } }}
+      style={{ outline: 'none' }} className="flipbook-root">
+      {/* Force pan-y on every internal react-pageflip element so vertical scroll is never captured */}
+      <style>{`.flipbook-root * { touch-action: pan-y !important; } .flipbook-root .stf__item { background-color: #fff; }`}</style>
+      <span className="sr-only" aria-live="polite">{announcement}</span>
+      <div style={{
+        padding: `${BED_PAD}px`,
+        border: '1px solid rgb(var(--color-text) / 0.2)',
+        borderRadius: '4px',
+      }}>
+      {view === 'grid' ? (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(auto-fill, minmax(${isTwoPage ? 120 : 90}px, 1fr))`,
+          gap: '8px',
+        }}>
+          {pages.map((page, i) => (
+            <button
+              key={page.src}
+              type="button"
+              onClick={() => setLightboxIdx(i)}
+              aria-label={`View ${pageLabel(i) ?? page.alt}`}
+              style={{
+                padding: 0, border: '1px solid rgb(var(--color-text) / 0.15)',
+                background: '#fff', cursor: 'pointer',
+                aspectRatio: `${aspectRatio}`, position: 'relative', overflow: 'hidden',
+                borderRadius: '2px',
+              }}
+            >
+              <img
+                src={page.src} alt={page.alt}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </button>
+          ))}
+        </div>
+      ) : (
+      <div style={{ touchAction: 'pan-y' }}>
         <div style={{ display: 'flex', justifyContent: 'center', transform: `translateX(${shiftX}px)`, transition: `transform 400ms ease` }}>
         <HTMLFlipBook
           key={isTwoPage ? 'two' : 'one'}
@@ -294,14 +493,14 @@ export default function FlipbookPDF({
           autoSize={false}
           renderOnlyPageLengthChange={false}
           className=""
-          style={{}}
+          style={{ touchAction: 'pan-y' }}
           onFlip={(e: any) => setCurrentPage(e.data)}
         >
-          {pages.map((src, i) => (
+          {pages.map((page, i) => (
             <FlipPage
-              key={src}
-              src={src}
-              alt={pageAlts[i] ?? `${alt}, page ${i + 1}`}
+              key={page.src}
+              src={page.src}
+              alt={page.alt}
               loaded={loadedSet.has(i)}
               error={errorSet.has(i)}
               onLoad={() => markLoaded(i)}
@@ -311,13 +510,39 @@ export default function FlipbookPDF({
         </HTMLFlipBook>
         </div>
       </div>
-      <Controls
-        label={displayLabel}
-        onPrev={() => bookRef.current?.pageFlip?.()?.flipPrev()}
-        onNext={() => bookRef.current?.pageFlip?.()?.flipNext()}
-        disablePrev={currentPage === 0}
-        disableNext={currentPage >= pages.length - (isTwoPage ? 2 : 1)}
-      />
+      )}
+      </div>
+      {view === 'book' && (
+        <Controls
+          label={visibleLabel}
+          onPrev={() => bookRef.current?.pageFlip?.()?.flipPrev()}
+          onNext={() => bookRef.current?.pageFlip?.()?.flipNext()}
+          disablePrev={currentPage === 0}
+          disableNext={currentPage >= pages.length - (isTwoPage ? 2 : 1)}
+        />
+      )}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+        <button
+          type="button"
+          onClick={() => setView((v) => (v === 'book' ? 'grid' : 'book'))}
+          style={{
+            background: 'transparent', border: 'none', padding: 0,
+            color: 'rgb(var(--color-text-link))', fontSize: '0.75rem',
+            cursor: 'pointer', textDecoration: 'underline', userSelect: 'none',
+          }}
+        >
+          {view === 'book' ? 'View all pages' : 'Back to book'}
+        </button>
+      </div>
+      {lightboxIdx !== null && pages[lightboxIdx] && (
+        <Lightbox
+          page={pages[lightboxIdx]}
+          label={pageLabel(lightboxIdx)}
+          onClose={() => setLightboxIdx(null)}
+          onPrev={lightboxIdx > 0 ? () => setLightboxIdx(lightboxIdx - 1) : undefined}
+          onNext={lightboxIdx < pages.length - 1 ? () => setLightboxIdx(lightboxIdx + 1) : undefined}
+        />
+      )}
     </div>
   );
 }

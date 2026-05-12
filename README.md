@@ -72,61 +72,72 @@ Prose goes here...
 ## Adding a book
 
 1. Create `src/content/books/your-book-name.md` (or `.mdx`) — the filename becomes the URL slug (`/books/your-book-name`)
-2. Add the cover image at `src/assets/books/your-book-name.webp`
-3. Add page images (for the flipbook) at `src/assets/books/your-book-name/page-001.webp`, `page-002.webp`, etc. — sorted alphabetically, so zero-pad the numbers
+2. Add the card cover image at `src/assets/books/your-book-name/cover.webp`
+3. Add the flipbook page images at `src/assets/flipbooks/your-book-name/page-000.webp`, `page-001.webp`, … — pages are sorted alphabetically, so zero-pad the numbers. Conventionally `page-000.webp` is the front cover and the last `page-NNN.webp` is the back cover.
 4. Fill in the frontmatter:
 
 ```md
 ---
 title: "My Book"
-description: "A short description shown on the card and detail page."
-cover: ../../assets/books/my-book.webp   # required — relative to this file
-alt: "Cover of My Book"                  # required
-year: 2024                               # optional
-numPages: 320                            # optional
-href: "https://example.com"             # optional — shown as "View book →" on the detail page
-order: 1                                 # optional — sort order on the index page
+description: "A short description, used for the SEO meta tag."
+cover: ../../assets/books/my-book/cover.webp   # required — book card cover
+alt: "Cover of My Book"                        # required
+year: 2024                                     # optional
+numPages: 320                                  # optional
+order: 1                                       # optional — sort order on the index page
 ---
+
+Body content (markdown / MDX) is rendered on the detail page above the flipbook.
 ```
 
-5. The book card appears in the Books section of the home page, linking to `/books/your-book-name`
-6. The detail page automatically shows a FlipbookPDF viewer if page images exist in the folder
+5. (Optional) Override page types and alt text by adding `src/assets/flipbooks/your-book-name/_pages.json`. Keys are filename stems:
 
-### FlipbookPDF: passing images from Astro
+```json
+{
+  "page-000": { "type": "cover", "alt": "Front cover" },
+  "page-001": { "type": "endpaper" },
+  "page-002": { "type": "frontmatter" },
+  "page-035": { "type": "backmatter" },
+  "page-036": { "type": "endpaper" },
+  "page-037": { "type": "cover", "alt": "Back cover" }
+}
+```
 
-React components can't use `<Image>` or `import` image assets directly. Instead, `BookLayout.astro` uses Astro's `getImage()` at build time to resolve URLs and passes them as plain strings to the React component:
+Page types drive how the page indicator labels the spread:
+
+| Type | Visible label |
+|---|---|
+| `content` (default) | `N / total` |
+| `cover` | `Cover` |
+| `endpaper`, `frontmatter`, `backmatter`, `blank` | `- / total` |
+
+Both `type` and `alt` are optional within each entry — missing fields fall back to `type: 'content'` and `alt: 'Page N'` (where N is the running count of content-typed pages).
+
+6. The book card appears in the Books section, linking to `/books/your-book-name`. The detail page renders the flipbook automatically when pages exist in `src/assets/flipbooks/your-book-name/`.
+
+### Flipbook in any layout
+
+`loadFlipbook(slug)` from `src/lib/load-flipbook.ts` resolves a flipbook directory into typed pages:
 
 ```astro
 ---
-import { getImage } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import FlipbookPDF from '../components/react/FlipbookPDF';
+import { loadFlipbook } from '../lib/load-flipbook';
 
-const raw = import.meta.glob<ImageMetadata>('../assets/books/**/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const pageUrls = await Promise.all(
-  Object.entries(raw)
-    .filter(([p]) => {
-      const filename = p.split('/').pop() ?? '';
-      return p.includes(`/books/${book.slug}/`) && filename.startsWith('page-');
-    })
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(async ([, img]) => (await getImage({ src: img })).src),
-);
+const pages = await loadFlipbook('sketchbook');
 ---
-<FlipbookPDF pages={pageUrls} alt="My Book" client:only="react" />
+
+<FlipbookPDF pages={pages} alt="Sketchbook" client:only="react" />
 ```
 
-This pattern works in any `.astro` file or layout. The `client:only="react"` directive is required — the component cannot SSR.
+The slug refers to a directory under `src/assets/flipbooks/`. The component cannot SSR — `client:only="react"` is required.
 
 **FlipbookPDF props:**
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `pages` | `string[]` | required | Resolved image URLs from `getImage()` |
+| `pages` | `FlipbookPage[]` | required | Output of `loadFlipbook()` — `{ src, alt, type }` per page |
 | `alt` | `string` | required | `aria-label` for the region |
-| `pageAlts` | `string[]` | `[]` | Per-page alt text (falls back to `"{alt}, page N"`) |
 | `startPage` | `number` | `0` | Initial page index |
 | `aspectRatio` | `number` | `0.75` | Width ÷ height of one page (3/4 = portrait) |
 
@@ -136,9 +147,13 @@ This pattern works in any `.astro` file or layout. The `client:only="react"` dir
 src/
   assets/
     portfolio/           ← hero + process images, one folder per piece
-    books/               ← book covers (my-book.webp) and page folders (my-book/page-001.webp)
+    books/               ← book card covers (my-book/cover.webp)
+    flipbooks/           ← flipbook page images (my-book/page-NNN.webp + optional _pages.json)
     themes/              ← theme picker portraits
     about/               ← headshot, etc.
+  lib/
+    flipbook-types.ts    ← PageType + FlipbookPage interface
+    load-flipbook.ts     ← loadFlipbook(slug) helper used by .astro layouts
   components/
     Nav.astro
     Footer.astro

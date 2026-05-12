@@ -1,0 +1,10 @@
+{
+  "page-000": { "type": "cover", "alt": "Front cover of ArcHive" },
+  "page-001": { "type": "endpaper" },
+  "page-002": { "type": "frontmatter" },
+  "page-003": { "type": "frontmatter" },
+  "page-034": { "type": "endmatter" },
+  "page-035": { "type": "endmatter" },
+  "page-036": { "type": "endpaper" },
+  "page-037": { "type": "cover", "alt": "Back cover of ArcHive" }
+}

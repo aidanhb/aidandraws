@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import FlipbookPDF from '../components/react/FlipbookPDF';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { loadFlipbook } from '../lib/load-flipbook';
 
 interface Props {
   piece: CollectionEntry<'portfolio'>;
@@ -12,6 +13,9 @@ interface Props {
 
 const { piece } = Astro.props;
 const { title, description, heroImage, alt, medium, dimensions, flipbook } = piece.data;
+
+// `flipbook` (from frontmatter) is the slug of a directory under src/assets/flipbooks/.
+const flipbookPages = flipbook ? await loadFlipbook(flipbook) : [];
 ---
 
 <BaseLayout title={`${title} | Aidan Holloway-Bidwell`} description={description}>
@@ -41,13 +45,11 @@ const { title, description, heroImage, alt, medium, dimensions, flipbook } = pie
         <slot />
       </div>
 
-      {
-        flipbook && (
-          <div class="mt-16">
-            <FlipbookPDF pdfPath={flipbook} client:load />
-          </div>
-        )
-      }
+      {flipbookPages.length > 0 && (
+        <div class="mt-16">
+          <FlipbookPDF pages={flipbookPages} alt={`Flipbook of ${title}`} client:only="react" />
+        </div>
+      )}
     </article>
   </main>
 

@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import ThemePicker from '../components/react/ThemePicker';
 import type { ImageMetadata } from 'astro';
+import logoRaw from '../assets/svg/logo_simple.svg?raw';
 
 interface Props {
   title?: string;
@@ -34,7 +35,8 @@ for (const [path, img] of Object.entries(portraitGlob)) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- No static favicon link — the script below provides the theme-tinted favicon on every load,
+         and a static link can cause Chrome to cache it for this URL and ignore later replacements. -->
 
     <!-- No-flash theme restore — must run synchronously before paint -->
     <script is:inline>
@@ -45,6 +47,71 @@ for (const [path, img] of Object.entries(portraitGlob)) {
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'wizard');
         }
+      })();
+    </script>
+
+    <!-- Theme-tinted favicon — rasterizes the logo SVG to a PNG via canvas with the current theme's
+         text color. PNG data URLs are universally supported as favicons, and each color produces a
+         distinct data URL, which sidesteps browsers' favicon caches. -->
+    <script is:inline define:vars={{ logoRaw }}>
+      (function () {
+        var FAVICON_SIZE = 64;
+        function escapeColor(c) {
+          return c.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        function update() {
+          var raw = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+          if (!raw) {
+            // CSS variable not yet resolved (e.g., dev-mode JS-injected styles haven't applied) — retry next frame.
+            requestAnimationFrame(update);
+            return;
+          }
+          // Tailwind stores theme colors as bare RGB triplets (e.g. "255 136 184") so they can be
+          // composed with alpha via rgb(var(--color) / <alpha>). Canvas fillStyle and SVG fill won't
+          // accept the bare form — wrap in legacy comma rgb(R, G, B).
+          var color = /^[\d\s.]+$/.test(raw) ? 'rgb(' + raw.split(/\s+/).join(', ') + ')' : raw;
+          var safe = escapeColor(color);
+          // Inject explicit width/height (Image() needs intrinsic dimensions to rasterize reliably).
+          // Also apply fill directly to every <path> — the Image→Canvas SVG rasterizer doesn't
+          // reliably inherit fill from the root <svg>, so per-path fill is the only safe option.
+          var svg = logoRaw
+            .replace(/^<\?xml[^>]*\?>\s*/, '')
+            .replace(/<svg\b([^>]*)>/, function (_, attrs) {
+              var stripped = attrs
+                .replace(/\s+fill="[^"]*"/, '')
+                .replace(/\s+width="[^"]*"/, '')
+                .replace(/\s+height="[^"]*"/, '');
+              return '<svg' + stripped + ' width="' + FAVICON_SIZE + '" height="' + FAVICON_SIZE + '">';
+            })
+            .replace(/<path\b([^>]*?)\s*\/?>/g, function (_, attrs) {
+              var stripped = attrs.replace(/\s+fill="[^"]*"/, '');
+              return '<path' + stripped + ' fill="' + safe + '"/>';
+            });
+          var img = new Image();
+          img.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = FAVICON_SIZE;
+            canvas.height = FAVICON_SIZE;
+            canvas.getContext('2d').drawImage(img, 0, 0, FAVICON_SIZE, FAVICON_SIZE);
+            var href = canvas.toDataURL('image/png');
+            document.querySelectorAll('link[rel*="icon"]').forEach(function (l) { l.remove(); });
+            var link = document.createElement('link');
+            link.rel = 'icon';
+            link.type = 'image/png';
+            link.href = href;
+            document.head.appendChild(link);
+          };
+          img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', update);
+        } else {
+          update();
+        }
+        new MutationObserver(update).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-theme'],
+        });
       })();
     </script>
 
