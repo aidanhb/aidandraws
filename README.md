@@ -143,7 +143,7 @@ The slug refers to a directory under `src/assets/flipbooks/`. The component cann
 
 ## File structure
 
-```
+```text
 src/
   assets/
     portfolio/           ← hero + process images, one folder per piece

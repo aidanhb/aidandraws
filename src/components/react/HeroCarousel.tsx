@@ -42,7 +42,6 @@ export default function HeroCarousel({ slides }: Props) {
     setReady(true);
     const raf = requestAnimationFrame(() => setAnimate(true));
     return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist on change.
@@ -74,14 +73,18 @@ export default function HeroCarousel({ slides }: Props) {
   const isSwipe = useRef(false);
 
   const onTouchStart = (e: React.TouchEvent) => {
-    startX.current = e.touches[0].clientX;
-    startY.current = e.touches[0].clientY;
+    const t = e.touches[0];
+    if (!t) return;
+    startX.current = t.clientX;
+    startY.current = t.clientY;
     isSwipe.current = false;
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    const dx = e.touches[0].clientX - startX.current;
-    const dy = e.touches[0].clientY - startY.current;
+    const t = e.touches[0];
+    if (!t) return;
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
     if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
       isSwipe.current = true;
     }
@@ -89,7 +92,9 @@ export default function HeroCarousel({ slides }: Props) {
 
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!isSwipe.current) return;
-    const dx = e.changedTouches[0].clientX - startX.current;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - startX.current;
     if (Math.abs(dx) > 50) {
       if (dx < 0) next();
       else prev();
@@ -143,41 +148,17 @@ export default function HeroCarousel({ slides }: Props) {
           <button
             onClick={prev}
             aria-label="Previous painting"
-            className="absolute left-6 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/50 transition-colors"
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/50 transition-colors text-2xl leading-none"
           >
-            <svg
-              width="36"
-              height="36"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="13.5 18 7.5 12 13.5 6" />
-            </svg>
+            ←
           </button>
 
           <button
             onClick={next}
             aria-label="Next painting"
-            className="absolute right-6 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/50 transition-colors"
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/50 transition-colors text-2xl leading-none"
           >
-            <svg
-              width="36"
-              height="36"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            →
           </button>
 
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2.5 bg-black/50 rounded-full px-3 py-2">

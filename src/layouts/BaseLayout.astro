@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemePicker from '../components/react/ThemePicker';
+import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import logoRaw from '../assets/svg/logo_simple.svg?raw';
 
@@ -12,22 +13,28 @@ interface Props {
 
 const {
   title = 'Aidan Holloway-Bidwell | Illustrator',
-  description = 'Fantasy illustration and concept art by Aidan Holloway-Bidwell.',
+  description = 'Fantasy illustration and worldbuilding by Aidan Holloway-Bidwell.',
   ogImage = '/og-default.png',
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 
-// Process portrait images for ThemePicker — eagerly glob all theme webps
+// Process portrait images for ThemePicker — originals are ~900px / 150KB each. Largest
+// display is the floating trigger at w-24 (96px), so 200px is plenty even at 2x DPR.
+// Explicit width + format prevent getImage URL collisions across parallel calls.
 const portraitGlob = import.meta.glob<ImageMetadata>('../assets/themes/*.webp', {
   eager: true,
   import: 'default',
 });
 const portraits: Record<string, string> = {};
-for (const [path, img] of Object.entries(portraitGlob)) {
-  const id = path.split('/').pop()?.replace('.webp', '') ?? '';
-  if (id) portraits[id] = img.src;
-}
+await Promise.all(
+  Object.entries(portraitGlob).map(async ([path, img]) => {
+    const id = path.split('/').pop()?.replace('.webp', '') ?? '';
+    if (!id) return;
+    const optimized = await getImage({ src: img, width: 200, format: 'webp', quality: 80 });
+    portraits[id] = optimized.src;
+  }),
+);
 ---
 
 <!doctype html>
@@ -42,9 +49,9 @@ for (const [path, img] of Object.entries(portraitGlob)) {
     <script is:inline>
       (function () {
         try {
-          var saved = localStorage.getItem('aidandraws-theme');
+          const saved = localStorage.getItem('aidandraws-theme');
           document.documentElement.setAttribute('data-theme', saved || 'wizard');
-        } catch (e) {
+        } catch {
           document.documentElement.setAttribute('data-theme', 'wizard');
         }
       })();
@@ -55,12 +62,12 @@ for (const [path, img] of Object.entries(portraitGlob)) {
          distinct data URL, which sidesteps browsers' favicon caches. -->
     <script is:inline define:vars={{ logoRaw }}>
       (function () {
-        var FAVICON_SIZE = 64;
+        const FAVICON_SIZE = 64;
         function escapeColor(c) {
           return c.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
         function update() {
-          var raw = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+          const raw = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
           if (!raw) {
             // CSS variable not yet resolved (e.g., dev-mode JS-injected styles haven't applied) — retry next frame.
             requestAnimationFrame(update);
@@ -69,33 +76,33 @@ for (const [path, img] of Object.entries(portraitGlob)) {
           // Tailwind stores theme colors as bare RGB triplets (e.g. "255 136 184") so they can be
           // composed with alpha via rgb(var(--color) / <alpha>). Canvas fillStyle and SVG fill won't
           // accept the bare form — wrap in legacy comma rgb(R, G, B).
-          var color = /^[\d\s.]+$/.test(raw) ? 'rgb(' + raw.split(/\s+/).join(', ') + ')' : raw;
-          var safe = escapeColor(color);
+          const color = /^[\d\s.]+$/.test(raw) ? 'rgb(' + raw.split(/\s+/).join(', ') + ')' : raw;
+          const safe = escapeColor(color);
           // Inject explicit width/height (Image() needs intrinsic dimensions to rasterize reliably).
           // Also apply fill directly to every <path> — the Image→Canvas SVG rasterizer doesn't
           // reliably inherit fill from the root <svg>, so per-path fill is the only safe option.
-          var svg = logoRaw
+          const svg = logoRaw
             .replace(/^<\?xml[^>]*\?>\s*/, '')
             .replace(/<svg\b([^>]*)>/, function (_, attrs) {
-              var stripped = attrs
+              const stripped = attrs
                 .replace(/\s+fill="[^"]*"/, '')
                 .replace(/\s+width="[^"]*"/, '')
                 .replace(/\s+height="[^"]*"/, '');
               return '<svg' + stripped + ' width="' + FAVICON_SIZE + '" height="' + FAVICON_SIZE + '">';
             })
             .replace(/<path\b([^>]*?)\s*\/?>/g, function (_, attrs) {
-              var stripped = attrs.replace(/\s+fill="[^"]*"/, '');
+              const stripped = attrs.replace(/\s+fill="[^"]*"/, '');
               return '<path' + stripped + ' fill="' + safe + '"/>';
             });
-          var img = new Image();
+          const img = new Image();
           img.onload = function () {
-            var canvas = document.createElement('canvas');
+            const canvas = document.createElement('canvas');
             canvas.width = FAVICON_SIZE;
             canvas.height = FAVICON_SIZE;
             canvas.getContext('2d').drawImage(img, 0, 0, FAVICON_SIZE, FAVICON_SIZE);
-            var href = canvas.toDataURL('image/png');
+            const href = canvas.toDataURL('image/png');
             document.querySelectorAll('link[rel*="icon"]').forEach(function (l) { l.remove(); });
-            var link = document.createElement('link');
+            const link = document.createElement('link');
             link.rel = 'icon';
             link.type = 'image/png';
             link.href = href;

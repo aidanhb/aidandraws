@@ -49,6 +49,12 @@ const pages = await loadFlipbook(book.slug);
       {pages.length > 0 && (
         <div class="mt-8">
           <FlipbookPDF pages={pages} alt={`Flipbook of ${title}`} client:only="react" />
+          {/* SSR skeleton — reserves space while the JS bundle loads and React hydrates.
+              Hidden by the :not(:empty) selector below once astro-island has React children. */}
+          <div
+            class="flipbook-ssr-skeleton w-full rounded bg-text/10 aspect-[3/4] md:aspect-[3/2] animate-pulse"
+            aria-hidden="true"
+          />
         </div>
       )}
 
@@ -57,3 +63,10 @@ const pages = await loadFlipbook(book.slug);
 
   <Footer />
 </BaseLayout>
+
+<style is:global>
+  /* Once react-pageflip has hydrated and added children to its astro-island, hide the SSR skeleton. */
+  astro-island:not(:empty) + .flipbook-ssr-skeleton {
+    display: none;
+  }
+</style>

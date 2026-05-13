@@ -4,93 +4,95 @@
 
 /* ─── Theme palettes ─────────────────────────────────────────────────────── */
 
+/* Arcane tower at midnight — deep cosmic indigo, pearl, starlight gold, lavender */
 :root,
 [data-theme="wizard"] {
-  --color-bg:             #160912;
-  --color-text:           #ffffff;
-  --color-text-title:     #ffcf68;
-  --color-text-link:      #C2CEFF;
-  --color-text-secondary: #C2FFE1;
+  --color-bg:             #0a0420;
+  --color-text:           #e8e6ff;
+  --color-text-title:     #ffd866;
+  --color-text-link:      #b69eff;
+  --color-text-secondary: #6effd1;
 }
 
+/* Bloodied parchment — aged paper, ink, dried blood, deep forest */
 [data-theme="barbarian"] {
-  --color-bg:             #fbf0dc;
-  --color-text:           #00276a;
-  --color-text-title:     #8e0e00;
-  --color-text-link:      #00393d;
-  --color-text-secondary: #002b33;
+  --color-bg:             #e8d7a8;
+  --color-text:           #1f1208;
+  --color-text-title:     #7a1810;
+  --color-text-link:      #2d4a1d;
+  --color-text-secondary: #4a2c10;
 }
 
-/* TODO: design palette */
+/* Coral reef — deep teal water, pearl sand, coral, aqua, anemone pink */
 [data-theme="bard"] {
-  --color-bg:             #1c3639;
-  --color-text:           #ffedd5;
-  --color-text-title:     #ff6b51;
-  --color-text-link:      #3effdc;
-  --color-text-secondary: #f9ff55;
+  --color-bg:             #0d3548;
+  --color-text:           #fff5dc;
+  --color-text-title:     #ff6a4a;
+  --color-text-link:      #4fe8d0;
+  --color-text-secondary: #ffaad0;
 }
 
-/* TODO: design palette */
+/* Holy dawn — warm cream, sepia, royal gold, sky */
 [data-theme="cleric"] {
-  --color-bg:             #202324;
-  --color-text:           #ffffff;
-  --color-text-title:     #ffd59a;
-  --color-text-link:      #f9ad66;
-  --color-text-secondary: #cbe0ec;
+  --color-bg:             #fff5e0;
+  --color-text:           #3a2410;
+  --color-text-title:     #b8761a;
+  --color-text-link:      #2a6fa8;
+  --color-text-secondary: #8a5a1c;
 }
 
-/* TODO: design palette */
+/* Mossy grove with toadstools — deep forest with mushroom-orange complement */
 [data-theme="druid"] {
-  --color-bg:             #001407;
-  --color-text:           #f1ffce;
-  --color-text-title:     #97ff77;
-  --color-text-link:      #68cf89;
-  --color-text-secondary: #eeff8c;
+  --color-bg:             #0b1f10;
+  --color-text:           #e4f4c8;
+  --color-text-title:     #ff8c3b;
+  --color-text-link:      #76d96b;
+  --color-text-secondary: #d4ba6a;
 }
 
-/* TODO: design palette */
+/* Steel and bronze — cool slate armor, warm metal trim, blood */
 [data-theme="fighter"] {
-  --color-bg:             #ede2f1;
-  --color-text:           #000000;
-  --color-text-title:     #4c001b;
-  --color-text-link:      #5d1475;
-  --color-text-secondary: #6e0303;
+  --color-bg:             #2c333a;
+  --color-text:           #e8eef4;
+  --color-text-title:     #e89a3a;
+  --color-text-link:      #ff6b6b;
+  --color-text-secondary: #c0c8d0;
 }
 
-/* TODO: design palette */
+/* Heraldic — bright white field, royal navy, gold, emerald (knightly tabard) */
 [data-theme="paladin"] {
-  --color-bg:             #ffffff;
-  --color-text:           #4c350a;
-  --color-text-title:     #cf8c17;
-  --color-text-link:      #324ebc;
-  --color-text-secondary: #277b24;
+  --color-bg:             #fafaf5;
+  --color-text:           #0a1a4a;
+  --color-text-title:     #b8851a;
+  --color-text-link:      #0a7a4a;
+  --color-text-secondary: #6a5018;
 }
 
-/* TODO: design palette */
+/* Forest dusk — olive shadow, birch bark, fox rust, young leaf */
 [data-theme="ranger"] {
-  --color-bg:             #ebd7b7;
-  --color-text:           #000000;
-  --color-text-title:     #2d1f0f;
-  --color-text-link:      #ae4126;
-  --color-text-secondary: #1e2b1b;
+  --color-bg:             #1f2a18;
+  --color-text:           #e8dcb8;
+  --color-text-title:     #e8694a;
+  --color-text-link:      #9abf6a;
+  --color-text-secondary: #c0a878;
 }
 
-/* TODO: design palette */
+/* Lamplit shadow — charcoal alley, faded paper, blood, poison */
 [data-theme="rogue"] {
-  --color-bg:             #ffffff;
-  --color-text:           #000000;
-  --color-text-title:     #f10000;
-  --color-text-link:      #0a5b0a;
-  --color-text-secondary: #252726;
+  --color-bg:             #14110f;
+  --color-text:           #e0dcd0;
+  --color-text-title:     #d8331f;
+  --color-text-link:      #84c241;
+  --color-text-secondary: #aa9e7a;
 }
 
-/* TODO: design palette */
+/* Wild magic — arcane void, neon pink/cyan/lime overload */
 [data-theme="sorcerer"] {
-  --color-bg:             #00022d;
-  --color-text:           #ff88b8;
-  --color-text-title:     #ff8800;
-  --color-text-link:      #c2fff3;
-  --color-text-secondary: #90ffeb;
+  --color-bg:             #1a0033;
+  --color-text:           #ff79c6;
+  --color-text-title:     #41ffe0;
+  --color-text-link:      #c8ff5f;
+  --color-text-secondary: #ffcb6b;
 }
 
 

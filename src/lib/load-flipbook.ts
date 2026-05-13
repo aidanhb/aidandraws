@@ -58,7 +58,7 @@ export async function loadFlipbook(slug: string): Promise<FlipbookPage[]> {
   );
 
   return resolved.map(({ type, alt }, i) => ({
-    src: optimized[i].src,
+    src: optimized[i]!.src,
     alt,
     type,
   }));

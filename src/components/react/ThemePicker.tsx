@@ -123,19 +123,28 @@ export default function ThemePicker({ portraits }: Props) {
                     : 'hover:bg-white/5',
                 ].join(' ')}
               >
-                <div className="w-full aspect-square rounded overflow-hidden bg-white/5">
-                  {portrait ? (
-                    <img
-                      src={portrait}
-                      alt=""
-                      aria-hidden="true"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-text/30">
-                      <PaletteIcon size={20} />
-                    </div>
-                  )}
+                {/* data-theme scopes the CSS variables so bg-bg / bg-text / bg-text-title / bg-text-link
+                    inside use this theme's colors, not the site's current theme. */}
+                <div data-theme={theme.id} className="w-full bg-bg rounded overflow-hidden">
+                  <div className="flex gap-1 justify-center py-1.5" aria-hidden="true">
+                    <span className="w-1.5 h-1.5 rounded-sm bg-text" />
+                    <span className="w-1.5 h-1.5 rounded-sm bg-text-title" />
+                    <span className="w-1.5 h-1.5 rounded-sm bg-text-link" />
+                  </div>
+                  <div className="w-full aspect-square">
+                    {portrait ? (
+                      <img
+                        src={portrait}
+                        alt=""
+                        aria-hidden="true"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-text/30">
+                        <PaletteIcon size={20} />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <span className="text-[0.6rem] font-body uppercase tracking-wide text-text/70 w-full text-center leading-tight">
                   {theme.label}

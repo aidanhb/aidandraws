@@ -24,38 +24,62 @@ export interface FlipbookProps {
 
 // react-pageflip requires page children to be forwardRef components.
 // The outer div is the DOM element the flip engine transforms.
-const FlipPage = React.forwardRef<
-  HTMLDivElement,
-  { src: string; alt: string; loaded: boolean; error: boolean; onLoad: () => void; onError: () => void }
->(({ src, alt, loaded, error, onLoad, onError }, ref) => (
-  <div ref={ref} style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#fff', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
-    {!loaded && !error && (
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgb(var(--color-text) / 0.06)' }} />
-    )}
-    {error && (
-      <div
-        style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'rgb(var(--color-text-secondary))', fontSize: '0.8rem',
-          textAlign: 'center', padding: '1rem',
-        }}
-      >
-        Failed to load page
+interface FlipPageProps {
+  src: string;
+  alt: string;
+  loaded: boolean;
+  error: boolean;
+  eager: boolean;
+  reducedMotion: boolean;
+  onLoad: () => void;
+  onError: () => void;
+}
+const FlipPage = React.forwardRef<HTMLDivElement, FlipPageProps>(
+  ({ src, alt, loaded, error, eager, reducedMotion, onLoad, onError }, ref) => {
+    // If the <img> has already completed by the time React attaches its ref (e.g. served from
+    // disk cache), the onLoad event may not fire. Reconcile via the `complete` property.
+    const imgRef = useRef<HTMLImageElement>(null);
+    useEffect(() => {
+      if (imgRef.current?.complete && imgRef.current.naturalWidth > 0 && !loaded) onLoad();
+    }, [src, loaded, onLoad]);
+    return (
+      <div ref={ref} style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#fff', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+        {!loaded && !error && (
+          <div
+            className={reducedMotion ? undefined : 'flipbook-shimmer'}
+            style={{ position: 'absolute', inset: 0, backgroundColor: '#e8e8e8' }}
+          />
+        )}
+        {error && (
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'rgb(var(--color-text-secondary))', fontSize: '0.8rem',
+              textAlign: 'center', padding: '1rem',
+            }}
+          >
+            Failed to load page
+          </div>
+        )}
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={onLoad}
+          onError={onError}
+          style={{
+            width: '100%', height: '100%', objectFit: 'fill', display: 'block',
+            opacity: loaded ? 1 : 0,
+            transition: reducedMotion ? 'none' : 'opacity 200ms ease-out',
+          }}
+        />
       </div>
-    )}
-    <img
-      src={src}
-      alt={alt}
-      onLoad={onLoad}
-      onError={onError}
-      style={{
-        width: '100%', height: '100%', objectFit: 'fill', display: 'block',
-        opacity: loaded ? 1 : 0, transition: 'opacity 0.2s',
-      }}
-    />
-  </div>
-));
+    );
+  },
+);
 FlipPage.displayName = 'FlipPage';
 
 const BTN: React.CSSProperties = {
@@ -168,6 +192,7 @@ export default function FlipbookPDF({
 }: FlipbookProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   // react-pageflip types its own ref as `any`
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bookRef = useRef<any>(null);
   // Tracks whether the most recent focus came from a pointer (touch/click) vs keyboard.
   // Pointer-initiated focus is immediately blurred to prevent mobile scroll-to-view;
@@ -178,7 +203,6 @@ export default function FlipbookPDF({
   const [loadedSet, setLoadedSet] = useState<Set<number>>(new Set());
   const [errorSet, setErrorSet] = useState<Set<number>>(new Set());
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [fadePage, setFadePage] = useState(startPage);
   const [view, setView] = useState<'book' | 'grid'>('book');
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
@@ -241,6 +265,7 @@ export default function FlipbookPDF({
     if (rightIdx == null || !pages[rightIdx]) return announceOne(leftIdx);
     const left = pages[leftIdx];
     const right = pages[rightIdx];
+    if (!left || !right) return announceOne(leftIdx);
     if (left.type === 'content' && right.type === 'content') {
       return `Pages ${contentNumbers[leftIdx]} to ${contentNumbers[rightIdx]} of ${totalContent}`;
     }
@@ -254,7 +279,10 @@ export default function FlipbookPDF({
     const el = containerRef.current;
     if (!el) return;
     setContainerWidth(el.getBoundingClientRect().width);
-    const ro = new ResizeObserver((entries) => setContainerWidth(entries[0].contentRect.width));
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setContainerWidth(entry.contentRect.width);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -268,12 +296,16 @@ export default function FlipbookPDF({
     if (!el) return;
     let startX = 0, startY = 0;
     const onStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
+      const t = e.touches[0];
+      if (!t) return;
+      startX = t.clientX;
+      startY = t.clientY;
     };
     const onEnd = (e: TouchEvent) => {
-      const dx = Math.abs(e.changedTouches[0].clientX - startX);
-      const dy = Math.abs(e.changedTouches[0].clientY - startY);
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = Math.abs(t.clientX - startX);
+      const dy = Math.abs(t.clientY - startY);
       if (dy > dx) e.stopPropagation();
     };
     el.addEventListener('touchstart', onStart, { capture: true, passive: true });
@@ -305,26 +337,16 @@ export default function FlipbookPDF({
       if (view !== 'book') return;
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
       e.preventDefault();
-      if (reducedMotion) {
-        const totalSpreads = isTwoPage ? Math.ceil(pages.length / 2) : pages.length;
-        setFadePage((p) => {
-          if (e.key === 'ArrowRight') return Math.min(p + 1, totalSpreads - 1);
-          if (e.key === 'ArrowLeft') return Math.max(p - 1, 0);
-          if (e.key === 'Home') return 0;
-          return totalSpreads - 1;
-        });
-      } else {
-        const pf = bookRef.current?.pageFlip?.();
-        if (!pf) return;
-        if (e.key === 'ArrowRight') pf.flipNext();
-        else if (e.key === 'ArrowLeft') pf.flipPrev();
-        else if (e.key === 'Home') pf.flip(0);
-        else pf.flip(pages.length - 1);
-      }
+      const pf = bookRef.current?.pageFlip?.();
+      if (!pf) return;
+      if (e.key === 'ArrowRight') pf.flipNext();
+      else if (e.key === 'ArrowLeft') pf.flipPrev();
+      else if (e.key === 'Home') pf.flip(0);
+      else pf.flip(pages.length - 1);
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [pages.length, reducedMotion, isTwoPage, view, lightboxIdx]);
+  }, [pages.length, view, lightboxIdx]);
 
   // Lock body scroll while lightbox is open
   useEffect(() => {
@@ -337,54 +359,21 @@ export default function FlipbookPDF({
   const markLoaded = useCallback((i: number) => setLoadedSet((p) => new Set([...p, i])), []);
   const markError  = useCallback((i: number) => setErrorSet((p)  => new Set([...p, i])), []);
 
-  // ── Reduced-motion: cross-fade single-spread viewer ───────────────────────
-  if (reducedMotion) {
-    const totalSpreads = isTwoPage ? Math.ceil(pages.length / 2) : pages.length;
-    const leftIdx = isTwoPage ? fadePage * 2 : fadePage;
-    const rightIdx = isTwoPage && fadePage * 2 + 1 < pages.length ? fadePage * 2 + 1 : undefined;
-    const spreadIndices = rightIdx != null ? [leftIdx, rightIdx] : [leftIdx];
-
-    return (
-      <div ref={containerRef} role="region" aria-label={alt} tabIndex={0}
-      onPointerDown={() => { pointerActivatedRef.current = true; }}
-      onFocus={(e) => { if (pointerActivatedRef.current) { pointerActivatedRef.current = false; e.currentTarget.blur(); } }}
-      style={{ outline: 'none' }}>
-        <span className="sr-only" aria-live="polite">
-          {spreadAnnouncement(leftIdx, rightIdx)}
-        </span>
-        <div style={{ display: 'flex', gap: '2px', width: '100%' }}>
-          {spreadIndices.map((idx) => (
-            <img
-              key={idx}
-              src={pages[idx].src}
-              alt={pages[idx].alt}
-              style={{ flex: 1, width: 0, display: 'block', objectFit: 'cover', borderRadius: '2px', transition: 'opacity 300ms ease' }}
-            />
-          ))}
-        </div>
-        <Controls
-          label={spreadLabel(leftIdx, rightIdx)}
-          onPrev={() => setFadePage((p) => Math.max(p - 1, 0))}
-          onNext={() => setFadePage((p) => Math.min(p + 1, totalSpreads - 1))}
-          disablePrev={fadePage === 0}
-          disableNext={fadePage === totalSpreads - 1}
-        />
-        <details style={{ marginTop: '1rem' }}>
-          <summary
-            style={{ color: 'rgb(var(--color-text-link))', fontSize: '0.75rem', cursor: 'pointer', userSelect: 'none' }}
-          >
-            View all pages
-          </summary>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '0.75rem' }}>
-            {pages.map((page, i) => (
-              <img key={i} src={page.src} alt={page.alt}
-                style={{ width: '80px', height: 'auto', borderRadius: '2px' }} />
-            ))}
-          </div>
-        </details>
-      </div>
-    );
-  }
+  // Progressive preloading: as currentPage advances, force-fetch nearby pages so they're
+  // ready by the time the user flips. Browsers cache by URL, so calling `new Image()` here
+  // hydrates the cache even if the same <img> below is `loading="lazy"`.
+  const preloadedRef = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    for (let offset = -2; offset <= 4; offset++) {
+      const i = currentPage + offset;
+      const page = pages[i];
+      if (!page) continue;
+      if (preloadedRef.current.has(i)) continue;
+      preloadedRef.current.add(i);
+      const img = new Image();
+      img.src = page.src;
+    }
+  }, [currentPage, pages]);
 
   // ── Loading skeleton (before ResizeObserver fires) ────────────────────────
   if (containerWidth === 0 || pageWidth === 0) {
@@ -430,7 +419,25 @@ export default function FlipbookPDF({
       onFocus={(e) => { if (pointerActivatedRef.current) { pointerActivatedRef.current = false; e.currentTarget.blur(); } }}
       style={{ outline: 'none' }} className="flipbook-root">
       {/* Force pan-y on every internal react-pageflip element so vertical scroll is never captured */}
-      <style>{`.flipbook-root * { touch-action: pan-y !important; } .flipbook-root .stf__item { background-color: #fff; }`}</style>
+      <style>{`
+        .flipbook-root * { touch-action: pan-y !important; }
+        .flipbook-root .stf__item { background-color: #fff; }
+        @keyframes flipbook-shimmer {
+          0%   { background-position: -150% 0; }
+          100% { background-position: 150% 0; }
+        }
+        .flipbook-shimmer {
+          background-image: linear-gradient(
+            90deg,
+            rgb(255 255 255 / 0) 0%,
+            rgb(255 255 255 / 0.7) 50%,
+            rgb(255 255 255 / 0) 100%
+          );
+          background-size: 200% 100%;
+          background-repeat: no-repeat;
+          animation: flipbook-shimmer 1.6s ease-in-out infinite;
+        }
+      `}</style>
       <span className="sr-only" aria-live="polite">{announcement}</span>
       <div style={{
         padding: `${BED_PAD}px`,
@@ -465,7 +472,7 @@ export default function FlipbookPDF({
         </div>
       ) : (
       <div style={{ touchAction: 'pan-y' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', transform: `translateX(${shiftX}px)`, transition: `transform 400ms ease` }}>
+        <div style={{ display: 'flex', justifyContent: 'center', transform: `translateX(${shiftX}px)`, transition: reducedMotion ? 'none' : 'transform 400ms ease' }}>
         <HTMLFlipBook
           key={isTwoPage ? 'two' : 'one'}
           ref={bookRef}
@@ -474,8 +481,8 @@ export default function FlipbookPDF({
           size="fixed"
           startPage={currentPage}
           usePortrait={!isTwoPage}
-          drawShadow={true}
-          flippingTime={FLIP_MS}
+          drawShadow={!reducedMotion}
+          flippingTime={reducedMotion ? 1 : FLIP_MS}
           showCover={true}
           mobileScrollSupport
           clickEventForward={false}
@@ -494,6 +501,8 @@ export default function FlipbookPDF({
           renderOnlyPageLengthChange={false}
           className=""
           style={{ touchAction: 'pan-y' }}
+          // react-pageflip's onFlip is untyped
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onFlip={(e: any) => setCurrentPage(e.data)}
         >
           {pages.map((page, i) => (
@@ -503,6 +512,8 @@ export default function FlipbookPDF({
               alt={page.alt}
               loaded={loadedSet.has(i)}
               error={errorSet.has(i)}
+              eager={i < 3}
+              reducedMotion={reducedMotion}
               onLoad={() => markLoaded(i)}
               onError={() => markError(i)}
             />
