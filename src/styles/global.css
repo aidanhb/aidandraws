@@ -1,18 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* ─── Theme palettes ─────────────────────────────────────────────────────── */
+/* ─── Design tokens ──────────────────────────────────────────────────────── */
+/* The wizard theme's values are the defaults; other themes override the
+   --color-* variables in the [data-theme] blocks below. */
 
-/* Arcane tower at midnight — deep cosmic indigo, pearl, starlight gold, lavender */
-:root,
-[data-theme="wizard"] {
+@theme {
+  /* Fonts — generate `font-heading` / `font-body` utilities */
+  --font-heading: "Josefin Sans", sans-serif;
+  --font-body:    "Space Grotesk", sans-serif;
+
+  /* Font sizes (with paired line-heights) — generate `text-h1`…`text-p3` utilities */
+  --text-h1: 4rem;   --text-h1--line-height: 1.2;
+  --text-h2: 3.8rem; --text-h2--line-height: 1.2;
+  --text-h3: 3rem;   --text-h3--line-height: 1.2;
+  --text-h4: 2.4rem; --text-h4--line-height: 1.2;
+  --text-p1: 1.4rem; --text-p1--line-height: 1.5;
+  --text-p2: 1rem;   --text-p2--line-height: 1.5;
+  --text-p3: 0.9rem; --text-p3--line-height: 1.5;
+
+  /* Theme colors (wizard defaults) — generate `bg-bg`, `text-text`, `text-text-title`,
+     `text-text-link`, `text-text-secondary` and their alpha variants via color-mix. */
   --color-bg:             #0a0420;
   --color-text:           #e8e6ff;
   --color-text-title:     #ffd866;
   --color-text-link:      #b69eff;
   --color-text-secondary: #6effd1;
 }
+
+/* ─── Theme palettes ─────────────────────────────────────────────────────── */
+/* Each block overrides the design tokens above. Tailwind utilities reference these
+   via `var(--color-*)`, so changing `data-theme` on <html> re-themes the entire site. */
 
 /* Bloodied parchment — aged paper, ink, dried blood, deep forest */
 [data-theme="barbarian"] {
@@ -97,92 +114,99 @@
 
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
+/* These element-level rules live inside @layer base so Tailwind utilities (in @layer
+   utilities, which sorts later) win when applied to the same element — e.g. `list-none`
+   on a nav <ul> suppresses the default disc bullets defined below. Without @layer base,
+   element selectors here would beat utility classes because unlayered rules take
+   precedence over any layered rule in v4. */
 
-html {
-  background-color: rgb(var(--color-bg));
-  color: rgb(var(--color-text));
-  scroll-behavior: smooth;
-  transition: background-color 400ms ease, color 400ms ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
+@layer base {
   html {
-    scroll-behavior: auto;
-    transition: none;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    scroll-behavior: smooth;
+    transition: background-color 400ms ease, color 400ms ease;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+      transition: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
-}
 
-body {
-  background-color: rgb(var(--color-bg));
-  color: rgb(var(--color-text));
-  font-family: 'Space Grotesk', sans-serif;
-}
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+  }
 
-p + p {
-  margin-top: 1.25rem;
-}
+  p + p {
+    margin-top: 1.25rem;
+  }
 
-/* Inside a grid, sibling paragraphs may sit in different columns — rely on the
-   grid's gap for spacing rather than the consecutive-paragraph margin. */
-.grid > p + p {
-  margin-top: 0;
-}
+  /* Inside a grid, sibling paragraphs may sit in different columns — rely on the
+     grid's gap for spacing rather than the consecutive-paragraph margin. */
+  .grid > p + p {
+    margin-top: 0;
+  }
 
-h1 { font-size: 4rem;   line-height: 1.2; }
-h2 { font-size: 3.8rem; line-height: 1.2; }
-h3 { font-size: 3rem;   line-height: 1.2; }
-h4 { font-size: 2.4rem; line-height: 1.2; }
+  h1 { font-size: 4rem;   line-height: 1.2; }
+  h2 { font-size: 3.8rem; line-height: 1.2; }
+  h3 { font-size: 3rem;   line-height: 1.2; }
+  h4 { font-size: 2.4rem; line-height: 1.2; }
 
-h1,
-h2,
-h3,
-h4 {
-  font-family: 'Josefin Sans', sans-serif;
-  text-transform: uppercase;
-  color: rgb(var(--color-text-title));
-  transition: color 400ms ease;
-}
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    color: var(--color-text-title);
+    transition: color 400ms ease;
+  }
 
-h3 {
-  color: rgb(var(--color-text-link));
-}
+  h3 {
+    color: var(--color-text-link);
+  }
 
-a {
-  color: rgb(var(--color-text-link));
-  text-decoration: none;
-  transition: color 400ms ease;
-}
+  a {
+    color: var(--color-text-link);
+    text-decoration: none;
+    transition: color 400ms ease;
+  }
 
-a:hover {
-  text-decoration: underline;
-}
+  a:hover {
+    text-decoration: underline;
+  }
 
-figcaption {
-  transition: color 400ms ease;
-}
+  figcaption {
+    transition: color 400ms ease;
+  }
 
-*:focus-visible {
-  outline: 2px solid rgb(var(--color-text-link));
-  outline-offset: 2px;
-}
+  *:focus-visible {
+    outline: 2px solid var(--color-text-link);
+    outline-offset: 2px;
+  }
 
-/* ─── Prose lists ────────────────────────────────────────────────────────── */
+  /* Prose lists — markdown content (MDX in portfolio / book pages) gets disc / decimal
+     markers. Nav <ul>s carry `list-none p-0` which overrides these via the utilities layer. */
+  ul, ol {
+    padding-left: 1.5rem;
+  }
 
-ul, ol {
-  padding-left: 1.5rem;
-}
+  ul {
+    list-style-type: disc;
+  }
 
-ul {
-  list-style-type: disc;
-}
-
-ol {
-  list-style-type: decimal;
+  ol {
+    list-style-type: decimal;
+  }
 }

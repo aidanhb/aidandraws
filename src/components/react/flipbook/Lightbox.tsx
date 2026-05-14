@@ -74,7 +74,7 @@ export default function Lightbox({ page, label, onClose, onPrev, onNext }: Light
       role="dialog" aria-modal="true" aria-label={page.alt}
       tabIndex={-1}
       onClick={onClose}
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 p-8 outline-none"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/85 p-8 outline-none"
     >
       <img
         src={page.src} alt={page.alt}

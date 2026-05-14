@@ -9,7 +9,9 @@ export interface FlipPageProps {
   reducedMotion: boolean;
   onLoad: () => void;
   onError: () => void;
-  ref: React.Ref<HTMLDivElement>;
+  // Optional from the caller's perspective: react-pageflip injects this ref via
+  // React.cloneElement on the child, so Flipbook.tsx renders <FlipPage /> without it.
+  ref?: React.Ref<HTMLDivElement>;
 }
 
 // react-pageflip requires page children to be forwardRef components.
