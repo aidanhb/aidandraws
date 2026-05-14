@@ -20,7 +20,7 @@ npm run preview # preview build locally
 | Format | When to use |
 |---|---|
 | `.md` | Simple pieces — hero image + plain prose, no custom components |
-| `.mdx` | When you need `<Figure>` captions, `<FlipbookPDF>`, or any other custom component |
+| `.mdx` | When you need `<Figure>` captions, `<Split>`, or any other custom component |
 
 Both formats use identical frontmatter and produce identical detail pages. The only difference is MDX lets you import and use Astro/React components inline.
 
@@ -33,6 +33,8 @@ Both formats use identical frontmatter and produce identical detail pages. The o
 ```md
 ---
 title: Bloodcliff Keep          # required
+medium:                         # optional
+dimensions:                     # optional
 description: Short description  # required — used as meta description
 heroImage: ../../assets/portfolio/bloodcliff-keep.jpg  # required — relative to this file
 alt: Descriptive alt text       # required — enforced by TypeScript
@@ -41,7 +43,6 @@ tags: [fantasy, battle]         # optional — shown on card hover
 featured: true                  # optional — appears in the hero carousel
 order: 1                        # optional — sort order in grid (lower = earlier)
 objectPosition: "50% 30%"       # optional — CSS object-position for carousel crop anchor
-flipbook: /pdfs/bloodcliff.pdf  # optional — enables the PDF flipbook viewer
 ---
 
 Plain Markdown body goes here.
@@ -62,7 +63,7 @@ Prose goes here...
 <Figure
   src={sketchImg}
   alt="Descriptive alt text."
-  caption="Optional caption in mint."
+  caption="Optional caption."
   widthHint="narrow"
 />
 ```
@@ -121,18 +122,18 @@ Both `type` and `alt` are optional within each entry — missing fields fall bac
 
 ```astro
 ---
-import FlipbookPDF from '../components/react/FlipbookPDF';
+import Flipbook from '../components/react/Flipbook';
 import { loadFlipbook } from '../lib/load-flipbook';
 
 const pages = await loadFlipbook('sketchbook');
 ---
 
-<FlipbookPDF pages={pages} alt="Sketchbook" client:only="react" />
+<Flipbook pages={pages} alt="Sketchbook" client:only="react" />
 ```
 
 The slug refers to a directory under `src/assets/flipbooks/`. The component cannot SSR — `client:only="react"` is required.
 
-**FlipbookPDF props:**
+**Flipbook props:**
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
@@ -145,38 +146,48 @@ The slug refers to a directory under `src/assets/flipbooks/`. The component cann
 
 ```text
 src/
+  content.config.ts      ← Zod schemas + glob loaders for portfolio + books (Astro 6 location)
   assets/
     portfolio/           ← hero + process images, one folder per piece
     books/               ← book card covers (my-book/cover.webp)
     flipbooks/           ← flipbook page images (my-book/page-NNN.webp + optional _pages.json)
-    themes/              ← theme picker portraits
+    themes/              ← theme picker portraits, one per theme id
     about/               ← headshot, etc.
+    svg/                 ← inlined SVGs (nav logo, archive wordmark, simplified favicon source)
   lib/
     flipbook-types.ts    ← PageType + FlipbookPage interface
     load-flipbook.ts     ← loadFlipbook(slug) helper used by .astro layouts
+    themed-favicon.ts    ← installs a canvas-rasterized favicon that retints on data-theme changes
+    themes.ts            ← THEMES array (id + label) consumed by ThemePicker / MobileMenu
   components/
-    Nav.astro
+    Nav.astro            ← sticky nav with inlined logo SVG + desktop & mobile menus
     Footer.astro
-    Hero.astro           ← shows pieces with featured: true
-    PortfolioGrid.astro
+    Hero.astro           ← shows pieces with featured: true (renders HeroCarousel)
+    ArchiveBanner.astro  ← featured-project banner that sits between Hero and Portfolio
+    Portfolio.astro      ← portfolio section (title + preamble + grid)
     PortfolioCard.astro
     BookCard.astro
-    Books.astro
+    Books.astro          ← books section (title + preamble + grid)
     About.astro
+    SocialIcon.astro     ← shared Instagram / Email icon for Nav + Footer
+    Figure.astro         ← MDX caption helper
+    Split.astro          ← MDX two-column layout helper
+    Row.astro            ← MDX equal-column grid helper
     react/
-      FlipbookPDF.tsx    ← image-based flipbook viewer (react-pageflip)
+      HeroCarousel.tsx   ← fading carousel for featured portfolio pieces (client:load)
+      Flipbook.tsx       ← image-based flipbook viewer entry point (client:only="react")
+      flipbook/          ← Flipbook sub-components & hooks (FlipPage, Lightbox, Controls, etc.)
       ThemePicker.tsx
       MobileMenu.tsx
   content/
-    config.ts            ← Zod schemas for portfolio + books collections
     portfolio/           ← .md / .mdx files, one per piece
     books/               ← .md / .mdx files, one per book
   layouts/
-    BaseLayout.astro     ← <html>, SEO meta, Google Fonts, ThemePicker
+    BaseLayout.astro     ← <html>, SEO meta, Google Fonts, no-flash theme script, ThemePicker
     PieceLayout.astro    ← portfolio detail page layout
-    BookLayout.astro     ← book detail page layout (includes FlipbookPDF)
+    BookLayout.astro     ← book detail page layout (includes Flipbook)
   pages/
-    index.astro          ← single-page layout (Hero + Portfolio + Books + About)
+    index.astro          ← single-page layout (Hero + ArcHive + Portfolio + Books + About)
     [...slug].astro      ← portfolio detail pages
     books/
       [slug].astro       ← book detail pages
@@ -186,23 +197,24 @@ src/
 
 ## Design tokens
 
+Colors are CSS variables that swap per active theme — set on `<html>` via `data-theme="…"` by the theme picker. Five tokens, each surfaced as a Tailwind utility:
+
+| Token | CSS variable | Tailwind class | Used for |
+|---|---|---|---|
+| `bg` | `--color-bg` | `bg-bg` | Page / surface background |
+| `text` | `--color-text` | `text-text` | Body text |
+| `text-title` | `--color-text-title` | `text-text-title` | Section headings (h1, h2, h4) |
+| `text-link` | `--color-text-link` | `text-text-link` | Links and the h3 heading |
+| `text-secondary` | `--color-text-secondary` | `text-text-secondary` | Subtle / accent text (dates, captions) |
+
+Alpha is composable via Tailwind's `/<alpha>` shortcut — e.g. `bg-bg/50`, `text-text/70`. Each theme's actual hex values live in `src/styles/global.css` (a PostCSS plugin in `astro.config.mjs` converts the hex to the bare RGB triplets Tailwind's `rgb(var(--…) / <alpha-value>)` pattern needs). See the [Themes](#themes) section below for the full palette per theme and how to add new ones.
+
+**Fonts:**
+
 | Token | Value |
 |---|---|
-| `bg` | `#160912` (near-black purple) |
-| `text` | `#FFFFFF` |
-| `text-title` | `#FFE4A8` (cream) |
-| `text-link` | `#C2CEFF` (light blue) |
-| `text-secondary` | `#C2FFE1` (mint) |
 | `font-heading` | Josefin Sans |
 | `font-body` | Space Grotesk |
-
-## Logo
-
-Replace the "Aidan" text placeholder in `src/components/Nav.astro` with:
-
-```astro
-<img src="/logo.svg" alt="Aidan Draws" class="h-8 w-auto" />
-```
 
 ## Themes
 
