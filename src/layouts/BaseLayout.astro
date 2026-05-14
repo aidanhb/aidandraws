@@ -8,12 +8,18 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  heroPreload?: {
+    srcSetAvif: string;
+    srcSetWebp: string;
+    sizes: string;
+  };
 }
 
 const {
   title = 'Aidan Holloway-Bidwell | Illustrator',
   description = 'Fantasy illustration and worldbuilding by Aidan Holloway-Bidwell.',
   ogImage = '/og-default.png',
+  heroPreload,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
@@ -77,6 +83,19 @@ await Promise.all(
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+
+    {
+      heroPreload && (
+        <link
+          rel="preload"
+          as="image"
+          type="image/avif"
+          imagesrcset={heroPreload.srcSetAvif}
+          imagesizes={heroPreload.sizes}
+          fetchpriority="high"
+        />
+      )
+    }
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

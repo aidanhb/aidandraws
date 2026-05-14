@@ -6,6 +6,10 @@ const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : use
 
 interface Slide {
   src: string;
+  srcSetWebp: string;
+  srcSetAvif: string;
+  width: number;
+  height: number;
   alt: string;
   title: string;
   slug: string;
@@ -14,11 +18,12 @@ interface Slide {
 
 interface Props {
   slides: Slide[];
+  sizes: string;
 }
 
 const STORAGE_KEY = 'hero-carousel-index';
 
-export default function HeroCarousel({ slides }: Props) {
+export default function HeroCarousel({ slides, sizes }: Props) {
   const [current, setCurrent] = useState(0);
   // Skip the opacity transition on the very first paint after mount — otherwise restoring the
   // saved index (e.g. after browser back from a painting page) fades from slide 0 to the
@@ -139,12 +144,21 @@ export default function HeroCarousel({ slides }: Props) {
           tabIndex={i === current ? 0 : -1}
           aria-hidden={i !== current ? true : undefined}
         >
-          <img
-            src={slide.src}
-            alt={slide.alt}
-            className="w-full h-full object-cover"
-            style={slide.objectPosition ? { objectPosition: slide.objectPosition } : undefined}
-          />
+          <picture>
+            <source type="image/avif" srcSet={slide.srcSetAvif} sizes={sizes} />
+            <source type="image/webp" srcSet={slide.srcSetWebp} sizes={sizes} />
+            <img
+              src={slide.src}
+              alt={slide.alt}
+              width={slide.width}
+              height={slide.height}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={i === 0 ? 'high' : 'auto'}
+              decoding={i === 0 ? 'sync' : 'async'}
+              className="w-full h-full object-cover"
+              style={slide.objectPosition ? { objectPosition: slide.objectPosition } : undefined}
+            />
+          </picture>
         </a>
       ))}
 

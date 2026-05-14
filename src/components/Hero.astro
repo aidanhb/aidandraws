@@ -1,35 +1,17 @@
 ---
-import { getCollection } from 'astro:content';
-import { getImage } from 'astro:assets';
 import HeroCarousel from './react/HeroCarousel';
+import { HERO_SIZES, type HeroSlide } from '../lib/hero-slides';
 
-const allPieces = await getCollection('portfolio');
-const featured = allPieces
-  .filter((p) => p.data.featured)
-  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+interface Props {
+  slides: HeroSlide[];
+}
 
-const slides = await Promise.all(
-  featured.map(async (piece) => {
-    const optimized = await getImage({
-      src: piece.data.heroImage,
-      width: 2400,
-      format: 'webp',
-      quality: 85,
-    });
-    return {
-      src: optimized.src,
-      alt: piece.data.alt,
-      title: piece.data.title,
-      slug: piece.id,
-      objectPosition: piece.data.objectPosition,
-    };
-  })
-);
+const { slides } = Astro.props;
 ---
 
 {
   slides.length > 0 ? (
-    <HeroCarousel slides={slides} client:load />
+    <HeroCarousel slides={slides} sizes={HERO_SIZES} client:load />
   ) : (
     <div class="w-full h-screen flex items-center justify-center">
       <p class="text-p1 font-body text-text/30 text-center px-6">

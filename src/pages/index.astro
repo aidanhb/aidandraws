@@ -7,13 +7,20 @@ import Portfolio from '../components/Portfolio.astro';
 import About from '../components/About.astro';
 import Books from '../components/Books.astro';
 import Footer from '../components/Footer.astro';
+import { getHeroSlides, HERO_SIZES } from '../lib/hero-slides';
+
+const slides = await getHeroSlides();
+const first = slides[0];
+const heroPreload = first
+  ? { srcSetAvif: first.srcSetAvif, srcSetWebp: first.srcSetWebp, sizes: HERO_SIZES }
+  : undefined;
 ---
 
-<BaseLayout>
+<BaseLayout heroPreload={heroPreload}>
   <Nav />
 
   <main>
-    <Hero />
+    <Hero slides={slides} />
 
     <ArchiveBanner />
 
