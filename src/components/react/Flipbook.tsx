@@ -1,5 +1,5 @@
 /*
- * FlipbookPDF — image-based flipbook viewer using react-pageflip.
+ * Flipbook — image-based flipbook viewer using react-pageflip.
  *
  * IMPORTANT: always hydrate with client:only="react" — this component cannot SSR.
  *
@@ -7,12 +7,17 @@
  * `loadFlipbook(slug)` from src/lib/load-flipbook.ts in your .astro file:
  *
  *   const pages = await loadFlipbook(slug);
- *   <FlipbookPDF pages={pages} alt="My flipbook" client:only="react" />
+ *   <Flipbook pages={pages} alt="My flipbook" client:only="react" />
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import type { FlipbookPage } from '../../lib/flipbook-types';
+import FlipPage from './flipbook/FlipPage';
+import Lightbox from './flipbook/Lightbox';
+import Controls from './flipbook/Controls';
+import { useFlipbookPreload } from './flipbook/useFlipbookPreload';
+import { useBlockVerticalTouchFlip } from './flipbook/useBlockVerticalTouchFlip';
 
 export interface FlipbookProps {
   pages: FlipbookPage[];
@@ -22,169 +27,7 @@ export interface FlipbookProps {
   aspectRatio?: number;
 }
 
-// react-pageflip requires page children to be forwardRef components.
-// The outer div is the DOM element the flip engine transforms.
-interface FlipPageProps {
-  src: string;
-  alt: string;
-  loaded: boolean;
-  error: boolean;
-  eager: boolean;
-  reducedMotion: boolean;
-  onLoad: () => void;
-  onError: () => void;
-}
-const FlipPage = React.forwardRef<HTMLDivElement, FlipPageProps>(
-  ({ src, alt, loaded, error, eager, reducedMotion, onLoad, onError }, ref) => {
-    // If the <img> has already completed by the time React attaches its ref (e.g. served from
-    // disk cache), the onLoad event may not fire. Reconcile via the `complete` property.
-    const imgRef = useRef<HTMLImageElement>(null);
-    useEffect(() => {
-      if (imgRef.current?.complete && imgRef.current.naturalWidth > 0 && !loaded) onLoad();
-    }, [src, loaded, onLoad]);
-    return (
-      <div ref={ref} style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#fff', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
-        {!loaded && !error && (
-          <div
-            className={reducedMotion ? undefined : 'flipbook-shimmer'}
-            style={{ position: 'absolute', inset: 0, backgroundColor: '#e8e8e8' }}
-          />
-        )}
-        {error && (
-          <div
-            style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'rgb(var(--color-text-secondary))', fontSize: '0.8rem',
-              textAlign: 'center', padding: '1rem',
-            }}
-          >
-            Failed to load page
-          </div>
-        )}
-        <img
-          ref={imgRef}
-          src={src}
-          alt={alt}
-          loading={eager ? 'eager' : 'lazy'}
-          decoding="async"
-          onLoad={onLoad}
-          onError={onError}
-          style={{
-            width: '100%', height: '100%', objectFit: 'fill', display: 'block',
-            opacity: loaded ? 1 : 0,
-            transition: reducedMotion ? 'none' : 'opacity 200ms ease-out',
-          }}
-        />
-      </div>
-    );
-  },
-);
-FlipPage.displayName = 'FlipPage';
-
-const BTN: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid rgb(var(--color-text-link) / 0.4)',
-  color: 'rgb(var(--color-text-link))',
-  borderRadius: '4px',
-  padding: '0.25rem 0.875rem',
-  fontSize: '1rem',
-  lineHeight: '1.5',
-  transition: 'border-color 150ms, opacity 150ms',
-};
-
-function Lightbox({
-  page, label, onClose, onPrev, onNext,
-}: {
-  page: FlipbookPage;
-  label: string | null;
-  onClose: () => void;
-  onPrev?: () => void;
-  onNext?: () => void;
-}) {
-  const navBtn: React.CSSProperties = {
-    background: 'rgb(0 0 0 / 0.4)',
-    border: '1px solid rgb(255 255 255 / 0.4)',
-    color: 'white',
-    borderRadius: '999px',
-    width: '2.75rem',
-    height: '2.75rem',
-    fontSize: '1.25rem',
-    lineHeight: 1,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
-  return (
-    <div
-      role="dialog" aria-modal="true" aria-label={page.alt}
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgb(0 0 0 / 0.85)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 1000, padding: '2rem',
-      }}
-    >
-      <img
-        src={page.src} alt={page.alt}
-        onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 'min(90vw, 1200px)', maxHeight: '90vh', objectFit: 'contain', display: 'block' }}
-      />
-      <button
-        type="button" onClick={onClose} aria-label="Close"
-        style={{ ...navBtn, position: 'absolute', top: '1rem', right: '1rem' }}
-      >×</button>
-      {onPrev && (
-        <button
-          type="button" onClick={(e) => { e.stopPropagation(); onPrev(); }} aria-label="Previous page"
-          style={{ ...navBtn, position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }}
-        >←</button>
-      )}
-      {onNext && (
-        <button
-          type="button" onClick={(e) => { e.stopPropagation(); onNext(); }} aria-label="Next page"
-          style={{ ...navBtn, position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)' }}
-        >→</button>
-      )}
-      {label && (
-        <div style={{
-          position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)',
-          color: 'white', fontSize: '0.875rem', background: 'rgb(0 0 0 / 0.4)',
-          padding: '0.25rem 0.75rem', borderRadius: '999px',
-        }}>{label}</div>
-      )}
-    </div>
-  );
-}
-
-function Controls({
-  label, onPrev, onNext, disablePrev, disableNext,
-}: {
-  label: string | null; onPrev: () => void; onNext: () => void;
-  disablePrev: boolean; disableNext: boolean;
-}) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
-      <button
-        onClick={onPrev} disabled={disablePrev} aria-label="Previous page"
-        style={{ ...BTN, opacity: disablePrev ? 0.35 : 1, cursor: disablePrev ? 'default' : 'pointer' }}
-      >←</button>
-      {label !== null && (
-        <span style={{ color: 'rgb(var(--color-text-secondary))', fontSize: '0.875rem', minWidth: '5.5rem', textAlign: 'center' }}>
-          {label}
-        </span>
-      )}
-      <button
-        onClick={onNext} disabled={disableNext} aria-label="Next page"
-        style={{ ...BTN, opacity: disableNext ? 0.35 : 1, cursor: disableNext ? 'default' : 'pointer' }}
-      >→</button>
-    </div>
-  );
-}
-
-export default function FlipbookPDF({
+export default function Flipbook({
   pages,
   alt,
   startPage = 0,
@@ -287,34 +130,7 @@ export default function FlipbookPDF({
     return () => ro.disconnect();
   }, []);
 
-  // Block vertical-scroll gestures from triggering page flips.
-  // touch-action:pan-y prevents touchmove from firing for vertical gestures (browser owns
-  // the scroll), but touchstart/touchend still fire — react-pageflip interprets that as a
-  // tap/flip. Capture-phase touchend intercepts before react-pageflip's bubble handlers.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    let startX = 0, startY = 0;
-    const onStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      startX = t.clientX;
-      startY = t.clientY;
-    };
-    const onEnd = (e: TouchEvent) => {
-      const t = e.changedTouches[0];
-      if (!t) return;
-      const dx = Math.abs(t.clientX - startX);
-      const dy = Math.abs(t.clientY - startY);
-      if (dy > dx) e.stopPropagation();
-    };
-    el.addEventListener('touchstart', onStart, { capture: true, passive: true });
-    el.addEventListener('touchend', onEnd, { capture: true, passive: true });
-    return () => {
-      el.removeEventListener('touchstart', onStart, { capture: true });
-      el.removeEventListener('touchend', onEnd, { capture: true, passive: true } as EventListenerOptions);
-    };
-  }, []);
+  useBlockVerticalTouchFlip(containerRef);
 
   // prefers-reduced-motion
   useEffect(() => {
@@ -359,34 +175,16 @@ export default function FlipbookPDF({
   const markLoaded = useCallback((i: number) => setLoadedSet((p) => new Set([...p, i])), []);
   const markError  = useCallback((i: number) => setErrorSet((p)  => new Set([...p, i])), []);
 
-  // Progressive preloading: as currentPage advances, force-fetch nearby pages so they're
-  // ready by the time the user flips. Browsers cache by URL, so calling `new Image()` here
-  // hydrates the cache even if the same <img> below is `loading="lazy"`.
-  const preloadedRef = useRef<Set<number>>(new Set());
-  useEffect(() => {
-    for (let offset = -2; offset <= 4; offset++) {
-      const i = currentPage + offset;
-      const page = pages[i];
-      if (!page) continue;
-      if (preloadedRef.current.has(i)) continue;
-      preloadedRef.current.add(i);
-      const img = new Image();
-      img.src = page.src;
-    }
-  }, [currentPage, pages]);
+  useFlipbookPreload(currentPage, pages);
 
   // ── Loading skeleton (before ResizeObserver fires) ────────────────────────
   if (containerWidth === 0 || pageWidth === 0) {
     return (
       <div
         ref={containerRef}
-        style={{
-          width: '100%',
-          // preview a half-width page at the correct aspect while we wait
-          paddingBottom: `${(1 / aspectRatio) * 50}%`,
-          backgroundColor: 'rgb(var(--color-text) / 0.06)',
-          borderRadius: '4px',
-        }}
+        className="w-full bg-text/[0.06] rounded"
+        // paddingBottom is dynamic from `aspectRatio` — previews a half-width page at the correct aspect while we wait.
+        style={{ paddingBottom: `${(1 / aspectRatio) * 50}%` }}
       />
     );
   }
@@ -417,7 +215,7 @@ export default function FlipbookPDF({
     <div ref={containerRef} role="region" aria-label={alt} tabIndex={0}
       onPointerDown={() => { pointerActivatedRef.current = true; }}
       onFocus={(e) => { if (pointerActivatedRef.current) { pointerActivatedRef.current = false; e.currentTarget.blur(); } }}
-      style={{ outline: 'none' }} className="flipbook-root">
+      className="flipbook-root outline-none">
       {/* Force pan-y on every internal react-pageflip element so vertical scroll is never captured */}
       <style>{`
         .flipbook-root * { touch-action: pan-y !important; }
@@ -439,40 +237,38 @@ export default function FlipbookPDF({
         }
       `}</style>
       <span className="sr-only" aria-live="polite">{announcement}</span>
-      <div style={{
-        padding: `${BED_PAD}px`,
-        border: '1px solid rgb(var(--color-text) / 0.2)',
-        borderRadius: '4px',
-      }}>
+      <div className="p-4 border border-text/20 rounded">
       {view === 'grid' ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(auto-fill, minmax(${isTwoPage ? 120 : 90}px, 1fr))`,
-          gap: '8px',
-        }}>
+        <div
+          className="grid gap-2"
+          // gridTemplateColumns is dynamic on isTwoPage — can't be a static Tailwind class.
+          style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${isTwoPage ? 120 : 90}px, 1fr))` }}
+        >
           {pages.map((page, i) => (
             <button
               key={page.src}
               type="button"
               onClick={() => setLightboxIdx(i)}
               aria-label={`View ${pageLabel(i) ?? page.alt}`}
-              style={{
-                padding: 0, border: '1px solid rgb(var(--color-text) / 0.15)',
-                background: '#fff', cursor: 'pointer',
-                aspectRatio: `${aspectRatio}`, position: 'relative', overflow: 'hidden',
-                borderRadius: '2px',
-              }}
+              className="relative overflow-hidden p-0 rounded-sm border border-text/[0.15] bg-white cursor-pointer"
+              style={{ aspectRatio: `${aspectRatio}` }}
             >
               <img
                 src={page.src} alt={page.alt}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                className="block w-full h-full object-cover"
               />
             </button>
           ))}
         </div>
       ) : (
-      <div style={{ touchAction: 'pan-y' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', transform: `translateX(${shiftX}px)`, transition: reducedMotion ? 'none' : 'transform 400ms ease' }}>
+      <div className="touch-pan-y">
+        <div
+          className="flex justify-center"
+          style={{
+            transform: `translateX(${shiftX}px)`,
+            transition: reducedMotion ? 'none' : 'transform 400ms ease',
+          }}
+        >
         <HTMLFlipBook
           key={isTwoPage ? 'two' : 'one'}
           ref={bookRef}
@@ -532,15 +328,11 @@ export default function FlipbookPDF({
           disableNext={currentPage >= pages.length - (isTwoPage ? 2 : 1)}
         />
       )}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+      <div className="flex justify-center mt-4">
         <button
           type="button"
           onClick={() => setView((v) => (v === 'book' ? 'grid' : 'book'))}
-          style={{
-            background: 'transparent', border: 'none', padding: 0,
-            color: 'rgb(var(--color-text-link))', fontSize: '0.75rem',
-            cursor: 'pointer', textDecoration: 'underline', userSelect: 'none',
-          }}
+          className="bg-transparent border-0 p-0 text-text-link text-xs underline cursor-pointer select-none"
         >
           {view === 'book' ? 'View all pages' : 'Back to book'}
         </button>

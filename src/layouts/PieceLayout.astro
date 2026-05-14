@@ -2,20 +2,15 @@
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import FlipbookPDF from '../components/react/FlipbookPDF';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { loadFlipbook } from '../lib/load-flipbook';
 
 interface Props {
   piece: CollectionEntry<'portfolio'>;
 }
 
 const { piece } = Astro.props;
-const { title, description, heroImage, alt, medium, dimensions, flipbook } = piece.data;
-
-// `flipbook` (from frontmatter) is the slug of a directory under src/assets/flipbooks/.
-const flipbookPages = flipbook ? await loadFlipbook(flipbook) : [];
+const { title, description, heroImage, alt, medium, dimensions } = piece.data;
 ---
 
 <BaseLayout title={`${title} | Aidan Holloway-Bidwell`} description={description}>
@@ -44,12 +39,6 @@ const flipbookPages = flipbook ? await loadFlipbook(flipbook) : [];
       <div class="text-p2 font-body text-text space-y-4 leading-relaxed [&>p]:max-w-2xl [&>ul]:max-w-2xl [&>ol]:max-w-2xl [&>blockquote]:max-w-2xl">
         <slot />
       </div>
-
-      {flipbookPages.length > 0 && (
-        <div class="mt-16">
-          <FlipbookPDF pages={flipbookPages} alt={`Flipbook of ${title}`} client:only="react" />
-        </div>
-      )}
     </article>
   </main>
 

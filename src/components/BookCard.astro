@@ -1,31 +1,20 @@
 ---
 import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
-  title: string;
-  description: string;
-  cover: ImageMetadata;
-  alt: string;
-  href?: string;
-  year?: number;
-  numPages?: number;
+  book: CollectionEntry<'books'>;
 }
 
-const { title, description, cover, alt, href, year, numPages } = Astro.props;
-
-const Tag = href ? 'a' : 'div';
-const tagProps = href ? { href, class: 'no-underline hover:no-underline' } : {};
+const { book } = Astro.props;
+const { title, description, cover, alt, year, numPages } = book.data;
 ---
 
-<Tag
-  {...tagProps}
-  class:list={[
-    'flex flex-col sm:flex-row gap-6 items-start group',
-    href && 'no-underline hover:no-underline',
-  ]}
+<a
+  href={`/books/${book.id}`}
+  class="flex flex-col sm:flex-row gap-6 items-start group no-underline hover:no-underline"
 >
-  <div class="w-full sm:flex-none sm:w-64 overflow-hidden rounded shadow-md ring-1 ring-text/20 transition-transform duration-300 group-hover:scale-[1.03]">
+  <div class="w-full sm:flex-none sm:w-64 overflow-hidden rounded shadow-md ring-1 ring-text/20 transition-transform duration-300 group-hover:scale-105">
     <Image
       src={cover}
       alt={alt}
@@ -41,4 +30,4 @@ const tagProps = href ? { href, class: 'no-underline hover:no-underline' } : {};
     )}
     <p class="font-body text-text text-p2 leading-relaxed">{description}</p>
   </div>
-</Tag>
+</a>

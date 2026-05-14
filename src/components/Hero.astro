@@ -20,7 +20,7 @@ const slides = await Promise.all(
       src: optimized.src,
       alt: piece.data.alt,
       title: piece.data.title,
-      slug: piece.slug,
+      slug: piece.id,
       objectPosition: piece.data.objectPosition,
     };
   })

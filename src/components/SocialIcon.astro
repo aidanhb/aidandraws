@@ -1,0 +1,58 @@
+---
+/**
+ * SocialIcon — small social/contact icon link. Encapsulates the SVG shapes, the anchor
+ * wrapper styling, and the `rel`/`target` for external links. Add new platforms by
+ * extending the `Platform` union and the `META` map below.
+ */
+
+export type Platform = 'instagram' | 'email';
+
+interface Props {
+  platform: Platform;
+  size?: number;
+}
+
+const { platform, size = 20 } = Astro.props;
+
+const META: Record<Platform, { href: string; label: string; external: boolean }> = {
+  instagram: { href: 'https://www.instagram.com/aidan_thats_me/', label: 'Instagram', external: true  },
+  email:     { href: 'mailto:aidan@aidandraws.com',               label: 'Email',     external: false },
+};
+
+const { href, label, external } = META[platform];
+const externalAttrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<a
+  href={href}
+  aria-label={label}
+  class="text-text-link hover:text-text transition-colors flex items-center"
+  {...externalAttrs}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    {platform === 'instagram' && (
+      <Fragment>
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+      </Fragment>
+    )}
+    {platform === 'email' && (
+      <Fragment>
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <polyline points="2,4 12,13 22,4" />
+      </Fragment>
+    )}
+  </svg>
+</a>

@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import ArchiveBanner from '../components/ArchiveBanner.astro';
-import PortfolioGrid from '../components/PortfolioGrid.astro';
+import Portfolio from '../components/Portfolio.astro';
 import About from '../components/About.astro';
 import Books from '../components/Books.astro';
 import Footer from '../components/Footer.astro';
@@ -18,13 +18,7 @@ import Footer from '../components/Footer.astro';
     <ArchiveBanner />
 
     <section id="portfolio" class="py-16 scroll-mt-20">
-      <div class="max-w-[1200px] mx-auto px-6">
-        <h2 class="text-h2 font-heading text-text-title uppercase mb-4">Portfolio</h2>
-        <p class="text-p1 font-body text-text mb-10 max-w-2xl">
-          I specialize in fantasy and sci-fi world-building. I draw from a deep visual library built upon years of studying fantasy games, movies, and books.
-        </p>
-        <PortfolioGrid />
-      </div>
+      <Portfolio />
     </section>
 
     <section id="books" class="py-16 scroll-mt-20">

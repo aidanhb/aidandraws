@@ -16,15 +16,7 @@ const books = allBooks.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 9
   ) : (
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
       {books.map((book) => (
-        <BookCard
-          title={book.data.title}
-          description={book.data.description}
-          cover={book.data.cover}
-          alt={book.data.alt}
-          href={`/books/${book.slug}`}
-          year={book.data.year}
-          numPages={book.data.numPages}
-        />
+        <BookCard book={book} />
       ))}
     </div>
   )}

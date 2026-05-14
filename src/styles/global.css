@@ -34,9 +34,9 @@
 
 /* Holy dawn — warm cream, sepia, royal gold, sky */
 [data-theme="cleric"] {
-  --color-bg:             #fff5e0;
+  --color-bg:             #e0eeff;
   --color-text:           #3a2410;
-  --color-text-title:     #b8761a;
+  --color-text-title:     #915a0d;
   --color-text-link:      #2a6fa8;
   --color-text-secondary: #8a5a1c;
 }
@@ -63,7 +63,7 @@
 [data-theme="paladin"] {
   --color-bg:             #fafaf5;
   --color-text:           #0a1a4a;
-  --color-text-title:     #b8851a;
+  --color-text-title:     #a5740b;
   --color-text-link:      #0a7a4a;
   --color-text-secondary: #6a5018;
 }

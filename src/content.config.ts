@@ -1,7 +1,9 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
+import { glob } from 'astro/loaders';
 
 const portfolio = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: ['**/*.{md,mdx}', '!**/_*.{md,mdx}'], base: './src/content/portfolio' }),
   schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
@@ -13,13 +15,12 @@ const portfolio = defineCollection({
     order: z.number().optional(),
     medium: z.string().optional(),
     dimensions: z.string().optional(),
-    flipbook: z.string().optional(),
     objectPosition: z.string().optional(),
   }),
 });
 
 const books = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: ['**/*.{md,mdx}', '!**/_*.{md,mdx}'], base: './src/content/books' }),
   schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
