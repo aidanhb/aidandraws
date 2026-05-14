@@ -11,8 +11,12 @@ const sorted = allPieces.sort((a, b) => {
 });
 ---
 
-{
-  sorted.length > 0 ? (
+<div class="max-w-[1200px] mx-auto px-6">
+  <h2 class="text-h2 font-heading text-text-title uppercase mb-4">Portfolio</h2>
+  <p class="text-p1 font-body text-text mb-10 max-w-2xl">
+    I specialize in fantasy and sci-fi world-building. I draw from a deep visual library built upon years of studying fantasy games, movies, and books.
+  </p>
+  {sorted.length > 0 ? (
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 [grid-auto-rows:340px]">
       {sorted.map((piece) => (
         <PortfolioCard piece={piece} />
@@ -25,5 +29,5 @@ const sorted = allPieces.sort((a, b) => {
         <code class="text-text-secondary">src/content/portfolio/</code>.
       </p>
     </div>
-  )
-}
+  )}
+</div>

@@ -111,6 +111,8 @@ export default function HeroCarousel({ slides }: Props) {
 
   if (slides.length === 0) return null;
 
+  const activeSlide = slides[current];
+
   return (
     <div
       className="relative w-full h-screen overflow-hidden"
@@ -124,6 +126,9 @@ export default function HeroCarousel({ slides }: Props) {
       onTouchEnd={onTouchEnd}
       onClickCapture={onClickCapture}
     >
+      <span className="sr-only" aria-live="polite">
+        {activeSlide ? `Painting ${current + 1} of ${slides.length}: ${activeSlide.title}` : ''}
+      </span>
       {slides.map((slide, i) => (
         <a
           key={slide.slug}
@@ -167,6 +172,7 @@ export default function HeroCarousel({ slides }: Props) {
                 key={i}
                 onClick={() => setCurrent(i)}
                 aria-label={`Go to painting ${i + 1}`}
+                aria-current={i === current ? 'true' : undefined}
                 className={`w-1.5 h-1.5 rounded-full transition-colors ${
                   i === current ? 'bg-white' : 'bg-white/35'
                 }`}

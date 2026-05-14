@@ -2,7 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import FlipbookPDF from '../components/react/FlipbookPDF';
+import Flipbook from '../components/react/Flipbook';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { loadFlipbook } from '../lib/load-flipbook';
@@ -14,7 +14,7 @@ interface Props {
 const { book } = Astro.props;
 const { title, description, cover, alt, year, numPages } = book.data;
 
-const pages = await loadFlipbook(book.slug);
+const pages = await loadFlipbook(book.id);
 ---
 
 <BaseLayout title={`${title} | Aidan Holloway-Bidwell`} description={description}>
@@ -48,7 +48,7 @@ const pages = await loadFlipbook(book.slug);
       <!-- Flipbook -->
       {pages.length > 0 && (
         <div class="mt-8">
-          <FlipbookPDF pages={pages} alt={`Flipbook of ${title}`} client:only="react" />
+          <Flipbook pages={pages} alt={`Flipbook of ${title}`} client:only="react" />
           {/* SSR skeleton — reserves space while the JS bundle loads and React hydrates.
               Hidden by the :not(:empty) selector below once astro-island has React children. */}
           <div

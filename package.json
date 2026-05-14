@@ -13,10 +13,10 @@
     "knip": "knip"
   },
   "dependencies": {
-    "@astrojs/mdx": "4.3.14",
-    "@astrojs/react": "4.4.2",
+    "@astrojs/mdx": "^5.0.5",
+    "@astrojs/react": "^5.0.5",
     "@astrojs/tailwind": "6.0.2",
-    "astro": "5.18.1",
+    "astro": "^6.3.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-pageflip": "^2.0.3",

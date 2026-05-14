@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Link {
   label: string;
@@ -9,15 +9,42 @@ interface Props {
   links: Link[];
 }
 
+const MENU_ID = 'mobile-menu';
+
 export default function MobileMenu({ links }: Props) {
   const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
+
+  // On open, move focus into the first link so keyboard / SR users land in the menu.
+  useEffect(() => {
+    if (!open) return;
+    const raf = requestAnimationFrame(() => firstLinkRef.current?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
+
+  // Escape closes the menu and returns focus to the toggle. Mobile touch users never trigger
+  // this; it's for narrow-viewport desktop browsing, paired keyboards, and a11y tooling.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
 
   return (
     <>
       <button
+        ref={buttonRef}
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
+        aria-controls={MENU_ID}
         className="p-1 text-text/70 hover:text-text transition-colors"
       >
         {open ? (
@@ -34,16 +61,20 @@ export default function MobileMenu({ links }: Props) {
         )}
       </button>
 
-      <div
+      <nav
+        id={MENU_ID}
+        aria-label="Mobile navigation"
         className={`absolute top-full left-0 right-0 bg-bg/95 backdrop-blur-md border-b border-white/10 transition-all duration-200 ${
           open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'
         }`}
       >
         <ul className="flex flex-col px-6 py-4 gap-5 list-none m-0">
-          {links.map((link) => (
+          {links.map((link, idx) => (
             <li key={link.href}>
               <a
                 href={link.href}
+                ref={idx === 0 ? firstLinkRef : undefined}
+                tabIndex={open ? 0 : -1}
                 onClick={() => setOpen(false)}
                 className="font-body text-p2 text-text uppercase tracking-wider no-underline hover:text-text-link transition-colors"
               >
@@ -52,7 +83,7 @@ export default function MobileMenu({ links }: Props) {
             </li>
           ))}
         </ul>
-      </div>
+      </nav>
     </>
   );
 }

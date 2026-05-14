@@ -41,14 +41,19 @@ export async function loadFlipbook(slug: string): Promise<FlipbookPage[]> {
     .filter(([path]) => path.includes(slugPattern))
     .sort(([a], [b]) => a.localeCompare(b));
 
-  // Resolve type + alt first so we can run getImage calls in parallel.
+  // Resolve type + alt first so we can run getImage calls in parallel. `flatMap` so a page
+  // with an unparseable path is logged and skipped rather than crashing the build.
   let contentCount = 0;
-  const resolved = pageEntries.map(([path, img]) => {
-    const stem = path.split('/').pop()!.replace(/\.[^.]+$/, '');
+  const resolved = pageEntries.flatMap(([path, img]) => {
+    const stem = path.split('/').pop()?.replace(/\.[^.]+$/, '');
+    if (!stem) {
+      console.error(`[loadFlipbook] skipping page with unparseable path for slug "${slug}": ${path}`);
+      return [];
+    }
     const meta = metadata[stem] ?? {};
     const type: PageType = meta.type ?? 'content';
     if (type === 'content') contentCount += 1;
-    return { img, type, alt: meta.alt ?? `Page ${contentCount}` };
+    return [{ img, type, alt: meta.alt ?? `Page ${contentCount}` }];
   });
 
   // getImage with explicit width/format keeps URLs deterministic — without them parallel
@@ -57,9 +62,13 @@ export async function loadFlipbook(slug: string): Promise<FlipbookPage[]> {
     resolved.map(({ img }) => getImage({ src: img, width: 1000, format: 'webp' })),
   );
 
-  return resolved.map(({ type, alt }, i) => ({
-    src: optimized[i]!.src,
-    alt,
-    type,
-  }));
+  return resolved.flatMap(({ type, alt }, i) => {
+    const opt = optimized[i];
+    if (!opt) {
+      // Structurally unreachable — Promise.all preserves length — but log + skip if it ever happens.
+      console.error(`[loadFlipbook] optimized image missing at index ${i} for slug "${slug}"`);
+      return [];
+    }
+    return [{ src: opt.src, alt, type }];
+  });
 }

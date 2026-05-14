@@ -9,8 +9,12 @@ export default function ThemePicker({ portraits }: Props) {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState<ThemeId>(DEFAULT_THEME);
   const [pastHero, setPastHero] = useState(false);
+  // Updated only by user-driven `select` calls — kept separate from `current` so the initial
+  // localStorage sync on mount doesn't fire a spurious "Theme changed to…" announcement.
+  const [announcement, setAnnouncement] = useState('');
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     const sentinel = document.getElementById('portfolio');
@@ -34,9 +38,53 @@ export default function ThemePicker({ portraits }: Props) {
     setCurrent(id);
     document.documentElement.setAttribute('data-theme', id);
     try { localStorage.setItem(STORAGE_KEY, id); } catch {}
+    const theme = THEMES.find(t => t.id === id);
+    if (theme) setAnnouncement(`Theme changed to ${theme.label}`);
     setOpen(false);
     buttonRef.current?.focus();
   }, []);
+
+  // Focus the currently-selected menuitem (or first) when the menu opens.
+  useEffect(() => {
+    if (!open) return;
+    const currentIdx = THEMES.findIndex(t => t.id === current);
+    const initialIdx = currentIdx >= 0 ? currentIdx : 0;
+    // rAF: wait for layout so the menuitem is positioned before we focus it.
+    const raf = requestAnimationFrame(() => itemRefs.current[initialIdx]?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, [open, current]);
+
+  // Roving navigation between menuitems. Arrow keys / Home / End move focus; Tab is trapped
+  // inside the menu (wraps end-to-end) so keyboard users explicitly Escape or Enter to exit.
+  const onItemKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, idx: number) => {
+    const last = THEMES.length - 1;
+    let nextIdx: number | null = null;
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIdx = idx === last ? 0 : idx + 1;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIdx = idx === 0 ? last : idx - 1;
+        break;
+      case 'Home':
+        nextIdx = 0;
+        break;
+      case 'End':
+        nextIdx = last;
+        break;
+      case 'Tab':
+        nextIdx = e.shiftKey
+          ? (idx === 0 ? last : idx - 1)
+          : (idx === last ? 0 : idx + 1);
+        break;
+    }
+    if (nextIdx !== null) {
+      e.preventDefault();
+      itemRefs.current[nextIdx]?.focus();
+    }
+  };
 
   // Close on outside click or Escape
   useEffect(() => {
@@ -65,6 +113,7 @@ export default function ThemePicker({ portraits }: Props) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
+      <span className="sr-only" aria-live="polite">{announcement}</span>
       {/* Trigger */}
       <button
         ref={buttonRef}
@@ -103,19 +152,22 @@ export default function ThemePicker({ portraits }: Props) {
           open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none',
         ].join(' ')}
       >
-        <p className="text-[0.65rem] font-heading text-text-title uppercase tracking-widest mb-3 px-1">
+        <p className="text-[0.65rem] font-heading text-text uppercase tracking-widest mb-3 px-1">
           Choose a Theme
         </p>
 
         <div className="grid grid-cols-4 gap-1.5">
-          {THEMES.map((theme) => {
+          {THEMES.map((theme, idx) => {
             const isSelected = current === theme.id;
             const portrait = portraits[theme.id];
             return (
               <button
                 key={theme.id}
+                ref={(el) => { itemRefs.current[idx] = el; }}
                 role="menuitem"
+                tabIndex={open ? 0 : -1}
                 onClick={() => select(theme.id)}
+                onKeyDown={(e) => onItemKeyDown(e, idx)}
                 className={[
                   'flex flex-col items-center gap-1 p-1.5 rounded-lg transition-colors text-left',
                   isSelected

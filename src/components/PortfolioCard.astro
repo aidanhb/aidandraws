@@ -10,7 +10,7 @@ const { piece } = Astro.props;
 ---
 
 <a
-  href={`/${piece.slug}`}
+  href={`/${piece.id}`}
   class="block h-full overflow-hidden group relative no-underline hover:no-underline"
   aria-label={piece.data.title}
 >
@@ -26,7 +26,7 @@ const { piece } = Astro.props;
     class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/40 to-transparent transition-opacity duration-300 flex items-end p-4 opacity-0 group-hover:opacity-100"
   >
     <div>
-      <p class="text-text-title font-heading text-sm uppercase tracking-wider">{piece.data.title}</p>
+      <p class="text-text font-heading text-sm uppercase tracking-wider">{piece.data.title}</p>
       {
         (piece.data.medium || piece.data.dimensions) && (
           <p class="text-text-secondary text-xs mt-1">
