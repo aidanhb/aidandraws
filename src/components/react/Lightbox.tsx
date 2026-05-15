@@ -59,39 +59,48 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
     applyTransform(1, { x: 0, y: 0 });
   }, [src, applyTransform]);
 
-  // Wheel zoom — must be a non-passive DOM listener to call preventDefault.
+  // Wheel — non-passive so preventDefault works.
+  // ctrlKey = pinch gesture or Ctrl+scroll → zoom.
+  // No ctrlKey = two-finger swipe or scroll wheel → pan.
   useEffect(() => {
     const el = dialogRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-      zoomAt(e.clientX, e.clientY, scaleRef.current * factor);
+      if (e.ctrlKey) {
+        const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+        zoomAt(e.clientX, e.clientY, scaleRef.current * factor);
+      } else {
+        const mul = e.deltaMode === 1 ? 16 : 1; // line mode → pixels
+        applyTransform(scaleRef.current, {
+          x: offsetRef.current.x - e.deltaX * mul,
+          y: offsetRef.current.y - e.deltaY * mul,
+        });
+      }
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [zoomAt]);
+  }, [zoomAt, applyTransform]);
 
-  // ── Mouse drag ────────────────────────────────────────────────────────
-  const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+  // ── Mouse drag — always zooms (right/up = in, left/down = out) ────────
+  const zoomDrag = useRef<{ startY: number; startScale: number; cx: number; cy: number } | null>(null);
 
   const onMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     e.stopPropagation();
-    drag.current = { x: e.clientX, y: e.clientY, ox: offsetRef.current.x, oy: offsetRef.current.y };
+    zoomDrag.current = { startY: e.clientY, startScale: scaleRef.current, cx: e.clientX, cy: e.clientY };
     setIsDragging(true);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!drag.current) return;
-    applyTransform(scaleRef.current, {
-      x: drag.current.ox + e.clientX - drag.current.x,
-      y: drag.current.oy + e.clientY - drag.current.y,
-    });
+    if (!zoomDrag.current) return;
+    const dx = e.clientX - zoomDrag.current.cx;
+    const dy = e.clientY - zoomDrag.current.startY;
+    zoomAt(zoomDrag.current.cx, zoomDrag.current.cy, zoomDrag.current.startScale * Math.exp((dx - dy) / 150));
   };
 
   const onMouseUp = () => {
-    drag.current = null;
+    zoomDrag.current = null;
     setIsDragging(false);
   };
 
@@ -101,18 +110,22 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
     scaleRef.current > 1 ? applyTransform(1, { x: 0, y: 0 }) : zoomAt(e.clientX, e.clientY, 2.5);
   };
 
-  // ── Pinch / touch pan ─────────────────────────────────────────────────
-  const pinch = useRef<{ dist: number; scale: number; cx: number; cy: number } | null>(null);
+  // ── Touch: single-finger pans; two-finger pinches (zoom) + translates (pan) ──
+  const pinch = useRef<{ dist: number; scale: number; cx: number; cy: number; prevMidX: number; prevMidY: number } | null>(null);
   const touchDrag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
 
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       const [a, b] = [e.touches[0], e.touches[1]];
+      const midX = (a.clientX + b.clientX) / 2;
+      const midY = (a.clientY + b.clientY) / 2;
       pinch.current = {
         dist: Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY),
         scale: scaleRef.current,
-        cx: (a.clientX + b.clientX) / 2,
-        cy: (a.clientY + b.clientY) / 2,
+        cx: midX,
+        cy: midY,
+        prevMidX: midX,
+        prevMidY: midY,
       };
       touchDrag.current = null;
     } else if (e.touches.length === 1) {
@@ -126,7 +139,16 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
     if (e.touches.length === 2 && pinch.current) {
       const [a, b] = [e.touches[0], e.touches[1]];
       const dist = Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+      const midX = (a.clientX + b.clientX) / 2;
+      const midY = (a.clientY + b.clientY) / 2;
+      // Zoom centered on the initial midpoint
       zoomAt(pinch.current.cx, pinch.current.cy, pinch.current.scale * (dist / pinch.current.dist));
+      // Pan from midpoint translation (reads offsetRef updated by zoomAt above)
+      const dMidX = midX - pinch.current.prevMidX;
+      const dMidY = midY - pinch.current.prevMidY;
+      applyTransform(scaleRef.current, { x: offsetRef.current.x + dMidX, y: offsetRef.current.y + dMidY });
+      pinch.current.prevMidX = midX;
+      pinch.current.prevMidY = midY;
     } else if (e.touches.length === 1 && touchDrag.current) {
       const t = e.touches[0];
       applyTransform(scaleRef.current, {
@@ -182,7 +204,7 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
       className="fixed inset-0 z-1000 flex items-center justify-center bg-black/85 p-8 outline-none select-none"
-      style={{ cursor: isZoomed ? (isDragging ? 'grabbing' : 'grab') : undefined }}
+      style={{ cursor: undefined }}
     >
       <img
         src={src} alt={alt}
@@ -196,7 +218,7 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
         className="block object-contain max-w-[min(90vw,1200px)] max-h-[90vh]"
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-          cursor: isZoomed ? (isDragging ? 'grabbing' : 'grab') : undefined,
+          cursor: isDragging ? (isZoomed ? 'zoom-out' : 'zoom-in') : 'zoom-in',
           willChange: isZoomed ? 'transform' : undefined,
           touchAction: 'none',
           userSelect: 'none',
