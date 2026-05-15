@@ -110,6 +110,21 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
     scaleRef.current > 1 ? applyTransform(1, { x: 0, y: 0 }) : zoomAt(e.clientX, e.clientY, 2.5);
   };
 
+  // Non-passive touch listeners — prevents Safari from intercepting multi-touch
+  // gestures (pinch-to-zoom) before our handlers run. Single-touch is left alone
+  // so tap-to-close and button clicks still synthesize correctly.
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const prevent = (e: TouchEvent) => { if (e.touches.length > 1) e.preventDefault(); };
+    el.addEventListener('touchstart', prevent, { passive: false });
+    el.addEventListener('touchmove', prevent, { passive: false });
+    return () => {
+      el.removeEventListener('touchstart', prevent);
+      el.removeEventListener('touchmove', prevent);
+    };
+  }, []);
+
   // ── Touch: single-finger pans; two-finger pinches (zoom) + translates (pan) ──
   const pinch = useRef<{ dist: number; scale: number; cx: number; cy: number; prevMidX: number; prevMidY: number } | null>(null);
   const touchDrag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
@@ -203,24 +218,23 @@ export default function Lightbox({ src, alt, label, onClose, onPrev, onNext }: L
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
       className="fixed inset-0 z-1000 flex items-center justify-center bg-black/85 p-8 outline-none select-none"
-      style={{ cursor: undefined }}
+      style={{ cursor: undefined, touchAction: 'none' }}
     >
       <img
         src={src} alt={alt}
         onClick={(e) => e.stopPropagation()}
         onDoubleClick={onDblClick}
         onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
         draggable={false}
         className="block object-contain max-w-[min(90vw,1200px)] max-h-[90vh]"
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
           cursor: isDragging ? (isZoomed ? 'zoom-out' : 'zoom-in') : 'zoom-in',
           willChange: isZoomed ? 'transform' : undefined,
-          touchAction: 'none',
           userSelect: 'none',
         }}
       />
