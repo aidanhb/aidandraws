@@ -146,7 +146,7 @@ export default function ThemePicker({ portraits }: Props) {
         role="menu"
         aria-label="Theme options"
         className={[
-          'absolute bottom-full right-0 mb-3 w-[300px]',
+          'absolute bottom-full right-0 mb-3 w-100 max-w-xs',
           'bg-bg/50 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-3',
           'motion-safe:transition-all motion-safe:duration-150',
           open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none',
