@@ -31,6 +31,15 @@
 /* Each block overrides the design tokens above. Tailwind utilities reference these
    via `var(--color-*)`, so changing `data-theme` on <html> re-themes the entire site. */
 
+/* Arcane void — deep purple, lavender, gold, teal */
+[data-theme="wizard"] {
+  --color-bg:             #0a0420;
+  --color-text:           #e8e6ff;
+  --color-text-title:     #ffd866;
+  --color-text-link:      #b69eff;
+  --color-text-secondary: #6effd1;
+}
+
 /* Bloodied parchment — aged paper, ink, dried blood, deep forest */
 [data-theme="barbarian"] {
   --color-bg:             #e8d7a8;
@@ -54,26 +63,26 @@
   --color-bg:             #e0eeff;
   --color-text:           #3a2410;
   --color-text-title:     #915a0d;
-  --color-text-link:      #2a6fa8;
-  --color-text-secondary: #8a5a1c;
+  --color-text-link:      #0d6bd5;
+  --color-text-secondary: #0a1e90;
 }
 
 /* Mossy grove with toadstools — deep forest with mushroom-orange complement */
 [data-theme="druid"] {
-  --color-bg:             #0b1f10;
-  --color-text:           #e4f4c8;
-  --color-text-title:     #ff8c3b;
-  --color-text-link:      #76d96b;
-  --color-text-secondary: #d4ba6a;
+  --color-bg:             #f1fbda;
+  --color-text:           #00490b;
+  --color-text-title:     #580030;
+  --color-text-link:      #420066;
+  --color-text-secondary: #4d6214;
 }
 
 /* Steel and bronze — cool slate armor, warm metal trim, blood */
 [data-theme="fighter"] {
   --color-bg:             #2c333a;
   --color-text:           #e8eef4;
-  --color-text-title:     #e89a3a;
+  --color-text-title:     #fad96a;
   --color-text-link:      #ff6b6b;
-  --color-text-secondary: #c0c8d0;
+  --color-text-secondary: #d6caee;
 }
 
 /* Heraldic — bright white field, royal navy, gold, emerald (knightly tabard) */
@@ -91,7 +100,7 @@
   --color-text:           #e8dcb8;
   --color-text-title:     #e8694a;
   --color-text-link:      #9abf6a;
-  --color-text-secondary: #c0a878;
+  --color-text-secondary: #fff3ea;
 }
 
 /* Lamplit shadow — charcoal alley, faded paper, blood, poison */
@@ -103,13 +112,13 @@
   --color-text-secondary: #aa9e7a;
 }
 
-/* Wild magic — arcane void, neon pink/cyan/lime overload */
+/* Wild magic — lavender mist, deep void, electric violet, hot pink, neon teal */
 [data-theme="sorcerer"] {
-  --color-bg:             #1a0033;
-  --color-text:           #ff79c6;
-  --color-text-title:     #41ffe0;
-  --color-text-link:      #c8ff5f;
-  --color-text-secondary: #ffcb6b;
+  --color-bg:             #f6ecff;
+  --color-text:           #14002e;
+  --color-text-title:     #cc00ff;
+  --color-text-link:      #ff2d6b;
+  --color-text-secondary: #0007d6;
 }
 
 

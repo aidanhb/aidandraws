@@ -22,7 +22,7 @@ const { title, description, cover, alt, year, numPages } = book.data;
     />
   </div>
   <div class="flex-1 min-w-0 sm:pt-1">
-    <p class="font-heading text-text-link uppercase tracking-wider text-p1 leading-tight mb-2">{title}</p>
+    <p class="font-heading text-text-secondary uppercase tracking-wider text-p1 leading-tight mb-2">{title}</p>
     {(year || numPages) && (
       <p class="font-body text-text-secondary text-p3 mt-3">
         {[year, numPages ? `${numPages} pages` : undefined].filter(Boolean).join(' · ')}

@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 
 interface Link {
   label: string;
+  labelHtml?: string;
   href: string;
+  highlight?: boolean;
 }
 
 interface Props {
@@ -76,9 +78,15 @@ export default function MobileMenu({ links }: Props) {
                 ref={idx === 0 ? firstLinkRef : undefined}
                 tabIndex={open ? 0 : -1}
                 onClick={() => setOpen(false)}
-                className="font-body text-p2 text-text uppercase tracking-wider no-underline hover:text-text-link transition-colors"
+                aria-label={link.labelHtml ? link.label : undefined}
+                className={link.highlight
+                  ? 'inline-flex items-center tracking-wider no-underline px-2 py-0.5 rounded-full bg-accent/20 text-accent hover:bg-accent/30 transition-colors'
+                  : 'inline-flex items-center px-2 py-0.5 text-text uppercase tracking-wider no-underline hover:text-text-link transition-colors'
+                }
               >
-                {link.label}
+                {link.labelHtml
+                  ? <span aria-hidden="true" className="block h-5 [&>svg]:h-full [&>svg]:w-auto" dangerouslySetInnerHTML={{ __html: link.labelHtml }} />
+                  : link.label}
               </a>
             </li>
           ))}

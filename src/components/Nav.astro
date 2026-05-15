@@ -1,11 +1,17 @@
 ---
 import logoRaw from '../assets/svg/logo.svg?raw';
+import archiveLogoRaw from '../assets/svg/archive.svg?raw';
 import MobileMenu from './react/MobileMenu';
 import SocialIcon from './SocialIcon.astro';
 
+const archiveLogoSvg = archiveLogoRaw.replace(/<svg\b([^>]*)>/, (_, attrs) => {
+  const stripped = (attrs as string).replace(/\s+fill="[^"]*"/, '');
+  return `<svg${stripped} fill="currentColor">`;
+});
+
 const navLinks = [
   { label: 'Home', href: '/' },
-  { label: 'ArcHive', href: '/books/archive' },
+  { label: 'ArcHive', labelHtml: archiveLogoSvg, href: '/books/archive'},
   { label: 'Portfolio', href: '/#portfolio' },
   { label: 'Books', href: '/#books' },
   { label: 'About', href: '/#about-me' },
@@ -38,8 +44,8 @@ const navLinks = [
         </a>
       </li>
       <li>
-        <a href="/books/archive" class="font-body text-p3 text-text tracking-wider hover:text-text-link transition-colors no-underline">
-          ArcHive
+        <a href="/books/archive" aria-label="ArcHive" class="flex items-center no-underline px-3 py-1 rounded-full bg-accent/20 text-text-title hover:bg-accent/30 transition-colors">
+          <span aria-hidden="true" class="block h-4 [&>svg]:h-full [&>svg]:w-auto" set:html={archiveLogoSvg} />
         </a>
       </li>
       <li>

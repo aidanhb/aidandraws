@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
-import ArchiveBanner from '../components/ArchiveBanner.astro';
 import Portfolio from '../components/Portfolio.astro';
 import About from '../components/About.astro';
 import Books from '../components/Books.astro';
@@ -22,7 +21,13 @@ const heroPreload = first
   <main>
     <Hero slides={slides} />
 
-    <ArchiveBanner />
+    <section class="text-center text-xl max-w-300 mx-auto px-6 py-8 mt-4 border border-text-title/50 rounded-full">
+      <p class="text-text-title" >Do you need artwork for your project? I do commissions, let's work together.</p>
+      <p class="text-text-secondary">
+        Send me an email at{' '}
+        <a href="mailto:aidan@aidandraws.com" class=" underline hover:no-underline">aidan@aidandraws.com</a>
+      </p>
+    </section>
 
     <section id="portfolio" class="py-16 scroll-mt-20">
       <Portfolio />

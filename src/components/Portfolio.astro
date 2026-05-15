@@ -13,9 +13,35 @@ const sorted = allPieces.sort((a, b) => {
 
 <div class="max-w-[1200px] mx-auto px-6">
   <h2 class="text-h2 font-heading text-text-title uppercase mb-4">Portfolio</h2>
-  <p class="text-p1 font-body text-text mb-10 max-w-2xl">
-    I specialize in fantasy and sci-fi world-building. I draw from a deep visual library built upon years of studying fantasy games, movies, and books.
-  </p>
+    <div class="py-16 border-t border-text/10">
+      <div class="space-y-4">
+        <p class="text-p1 font-body text-text-secondary leading-relaxed">
+          I aim to make fantasy feel as tangible as reality.
+        </p>
+        <p class="text-p2 font-body text-text leading-relaxed">
+          Each painting is a puzzle to solve. The client provides a number of oddly-shaped pieces:
+          the overarching theme; the essential characters and details such as garb and environment;
+          the moment in time to be depicted as well as the moments preceding and following it. It's up
+          to me to figure out how all these pieces fit together visually.
+        </p>
+        <p class="text-p2 font-body text-text leading-relaxed">
+          I work primarily in acrylic paint. I build the painting up slowly, working
+          in gestural glazes before tightening up the essential details and areas of interest.
+          Occasionally, I'll augment the piece with colored pencil or gouache airbrush.
+        </p>
+        <p class="text-p2 font-body text-text leading-relaxed">
+          I take inspiration from the Golden Age illustrator N.C. Wyeth, as well as countless
+          contemporary painters like Ray Bonilla and Jesper Ejsing. These painters' sense of light
+          and shadow, direction of movement, and strong storytelling resonate with me.
+        </p>
+        <p class="text-p2 font-body text-text leading-relaxed">
+          I'm currently fleshing out multiple science-fiction and fantasy worlds. Some are in
+          collaboration with clients, and some are personal projects born from my own imagination. In
+          all of them, I enjoy the balance of fleshing out impactful, action-oriented visuals with
+          fine-tuned attention to worldbuilding detail.
+        </p>
+      </div>
+    </div>
   {sorted.length > 0 ? (
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 [grid-auto-rows:340px]">
       {sorted.map((piece) => (
