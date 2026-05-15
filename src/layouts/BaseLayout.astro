@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemePicker from '../components/react/ThemePicker';
+import LightboxPortal from '../components/react/LightboxPortal';
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -107,5 +108,20 @@ await Promise.all(
   <body class="bg-bg text-text font-body min-h-screen">
     <slot />
     <ThemePicker portraits={portraits} client:idle />
+    <LightboxPortal client:idle />
+
+    <!-- Delegate lightbox triggers: any [data-lightbox] button fires lightbox:open with
+         the resolved src from its child <img> (currentSrc picks the right srcset variant). -->
+    <script is:inline>
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest('[data-lightbox]');
+        if (!trigger) return;
+        const img = trigger.querySelector('img');
+        if (!img) return;
+        window.dispatchEvent(new CustomEvent('lightbox:open', {
+          detail: { src: img.currentSrc || img.src, alt: img.alt }
+        }));
+      });
+    </script>
   </body>
 </html>

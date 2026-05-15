@@ -9,5 +9,5 @@ year: 2026
 tags: [fantasy, sci-fi, character, cover art]
 featured: true
 order: 9
-objectPosition: 50% 35%
+objectPosition: 50% 30%
 ---

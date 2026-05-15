@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import type { FlipbookPage } from '../../lib/flipbook-types';
 import FlipPage from './flipbook/FlipPage';
-import Lightbox from './flipbook/Lightbox';
+import Lightbox from './Lightbox';
 import Controls from './flipbook/Controls';
 import { useFlipbookPreload } from './flipbook/useFlipbookPreload';
 import { useBlockVerticalTouchFlip } from './flipbook/useBlockVerticalTouchFlip';
@@ -339,8 +339,9 @@ export default function Flipbook({
       </div>
       {lightboxIdx !== null && pages[lightboxIdx] && (
         <Lightbox
-          page={pages[lightboxIdx]}
-          label={pageLabel(lightboxIdx)}
+          src={pages[lightboxIdx].src}
+          alt={pages[lightboxIdx].alt}
+          label={pageLabel(lightboxIdx) ?? undefined}
           onClose={() => setLightboxIdx(null)}
           onPrev={lightboxIdx > 0 ? () => setLightboxIdx(lightboxIdx - 1) : undefined}
           onNext={lightboxIdx < pages.length - 1 ? () => setLightboxIdx(lightboxIdx + 1) : undefined}

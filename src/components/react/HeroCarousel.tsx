@@ -120,8 +120,9 @@ export default function HeroCarousel({ slides, sizes }: Props) {
 
   return (
     <div
-      className="relative w-full h-screen overflow-hidden"
+      className="relative w-full overflow-hidden"
       style={{
+        height: 'calc(100svh - 5rem)',
         touchAction: 'pan-y',
         opacity: ready ? 1 : 0,
         transition: ready ? 'opacity 250ms ease-out' : 'none',
@@ -135,12 +136,13 @@ export default function HeroCarousel({ slides, sizes }: Props) {
         {activeSlide ? `Painting ${current + 1} of ${slides.length}: ${activeSlide.title}` : ''}
       </span>
       {slides.map((slide, i) => (
-        <a
-          key={slide.slug}
-          href={`/${slide.slug}`}
-          className={`absolute inset-0 ${animate ? 'transition-opacity duration-700' : ''} ${
+        <button
+          type="button"
+          data-lightbox
+          className={`block w-full cursor-zoom-in absolute inset-0 ${animate ? 'transition-opacity duration-700' : ''} ${
             i === current ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
+          aria-label="View full size"
           tabIndex={i === current ? 0 : -1}
           aria-hidden={i !== current ? true : undefined}
         >
@@ -159,7 +161,7 @@ export default function HeroCarousel({ slides, sizes }: Props) {
               style={slide.objectPosition ? { objectPosition: slide.objectPosition } : undefined}
             />
           </picture>
-        </a>
+        </button>
       ))}
 
       {slides.length > 1 && (

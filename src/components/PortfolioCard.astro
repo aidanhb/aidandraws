@@ -17,8 +17,7 @@ const { piece } = Astro.props;
   <Image
     src={piece.data.heroImage}
     alt={piece.data.alt}
-    width={600}
-    height={340}
+    width=600
     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
     style={piece.data.objectPosition ? `object-position: ${piece.data.objectPosition}` : undefined}
   />

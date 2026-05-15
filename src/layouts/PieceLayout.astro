@@ -26,13 +26,15 @@ const { title, description, heroImage, alt, medium, dimensions } = piece.data;
         </p>
       )}
 
-      <Image
-        src={heroImage}
-        alt={alt}
-        widths={[800, 1200]}
-        sizes="(max-width: 1200px) 100vw, 1200px"
-        class="w-full object-contain mb-10"
-      />
+      <button type="button" data-lightbox class="block w-full mb-10 cursor-zoom-in" aria-label="View full size">
+        <Image
+          src={heroImage}
+          alt={alt}
+          widths={[800, 1200]}
+          sizes="(max-width: 1200px) 100vw, 1200px"
+          class="w-full object-contain pointer-events-none"
+        />
+      </button>
 
       <p class="text-p1 font-body text-text mb-10">{description}</p>
 

@@ -9,5 +9,5 @@ year: 2026
 tags: [sci-fi, character, city]
 featured: true
 order: 8
-objectPosition: 50% 20%
+objectPosition: 50% 25%
 ---

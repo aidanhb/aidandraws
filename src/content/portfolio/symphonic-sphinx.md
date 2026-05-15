@@ -9,7 +9,7 @@ year: 2025
 tags: [fantasy, magic, undersea]
 featured: true
 order: 5
-objectPosition: 70% 50%
+objectPosition: 70% 30%
 ---
 
 Long-form description, process notes, or commentary about the piece goes here.

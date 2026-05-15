@@ -9,5 +9,5 @@ year: 2026
 tags: [sci-fi, industrial, item]
 featured: true
 order: 6
-objectPosition: 30% 50%
+objectPosition: 30% 10%
 ---

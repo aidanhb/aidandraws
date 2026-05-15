@@ -15,13 +15,15 @@ const isNarrow = widthHint === 'narrow';
 ---
 
 <figure class:list={['mx-auto mb-6', isNarrow ? 'max-w-[720px]' : 'max-w-[1200px]']}>
-  <Image
-    src={src}
-    alt={alt}
-    widths={isNarrow ? [360, 720, 1440] : [600, 1200, 2400]}
-    sizes={isNarrow ? '(max-width: 720px) 100vw, 720px' : '(max-width: 1200px) 100vw, 1200px'}
-    class="w-full"
-  />
+  <button type="button" data-lightbox class="block w-full cursor-zoom-in" aria-label="View full size">
+    <Image
+      src={src}
+      alt={alt}
+      widths={isNarrow ? [360, 720, 1440] : [600, 1200, 2400]}
+      sizes={isNarrow ? '(max-width: 720px) 100vw, 720px' : '(max-width: 1200px) 100vw, 1200px'}
+      class="w-full pointer-events-none"
+    />
+  </button>
   {caption && (
     <figcaption class="text-p3 font-body text-text-secondary italic text-center mt-3">
       {caption}
