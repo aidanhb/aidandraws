@@ -1,0 +1,8 @@
+# Specific redirects — processed before the catch-all.
+# Add new rules above the /* line.
+/cart        /    302
+/store       /    302
+/search      /    302
+/config      /    302
+
+/*           /    302

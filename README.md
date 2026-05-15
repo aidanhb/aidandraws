@@ -247,4 +247,20 @@ The site ships with a character-class theme switcher (palette icon, bottom-right
 
 ## Deployment
 
-Add `netlify.toml` or `wrangler.toml` / `_headers` for Cloudflare Pages. Build command: `npm run build`. Publish directory: `dist/`.
+Build command: `npm run build`. Publish directory: `dist/`.
+
+### Netlify redirects (`public/_redirects`)
+
+Netlify processes `public/_redirects` automatically at deploy time. Rules are evaluated top-to-bottom; the first match wins.
+
+| Rule | Target | Code | Purpose |
+|---|---|---|---|
+| `/cart` | `/` | 302 | Common bot/scraper path |
+| `/store` | `/` | 302 | Common bot/scraper path |
+| `/search` | `/` | 302 | Common bot/scraper path |
+| `/config` | `/` | 302 | Common bot/scraper path |
+| `/*` | `/` | 302 | Catch-all — any unmatched path |
+
+Netlify checks real built routes before consulting `_redirects`, so existing pages (`/books/archive`, portfolio slugs, etc.) are unaffected by the `/*` rule — it only fires for genuine 404s.
+
+**Adding a new redirect:** insert it above the `/*` line. Use 302 (temporary) rather than 301 (permanent) to avoid aggressive browser/CDN caching while the site is still evolving.

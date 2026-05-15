@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="Page Not Found | Aidan Holloway-Bidwell"
+  description="This page doesn't exist — you'll be returned to the homepage shortly."
+>
+  <Nav />
+
+  <main class="flex flex-col items-center justify-center text-center px-6 py-32 min-h-[calc(100svh-5rem)]">
+    <p class="font-body text-text-secondary uppercase tracking-widest text-p3 mb-4">404</p>
+    <h1 class="font-heading text-text-title uppercase text-h2 mb-6">You've Strayed from the Map</h1>
+    <p class="font-body text-text text-p1 mb-2">This page doesn't exist.</p>
+    <p class="font-body text-text/60 text-p2">
+      Redirecting to the homepage in <span id="countdown" class="text-text">3</span>…
+      or <a href="/" class="text-text-link underline hover:no-underline">click here</a>.
+    </p>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  const el = document.getElementById('countdown');
+  let seconds = 3;
+  const tick = setInterval(() => {
+    seconds -= 1;
+    if (el) el.textContent = String(seconds);
+    if (seconds <= 0) {
+      clearInterval(tick);
+      window.location.replace('/');
+    }
+  }, 1000);
+</script>
