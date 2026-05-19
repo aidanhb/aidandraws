@@ -8,6 +8,6 @@ alt: Three figures. A standing female figure in a fantasy wetsuit, holding a rou
 year: 2026
 tags: [fantasy, sci-fi, character, cover art]
 featured: true
-order: 9
+order: 10
 objectPosition: 50% 30%
 ---

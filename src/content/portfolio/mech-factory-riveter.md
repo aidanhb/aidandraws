@@ -8,6 +8,6 @@ alt: A futuristic Rosie the Riveter in a 19th century style factory.
 year: 2026
 tags: [sci-fi, industrial, item]
 featured: true
-order: 6
+order: 7
 objectPosition: 30% 10%
 ---

@@ -8,6 +8,6 @@ alt: A futuristic figure in a tall crown sits on a spot lit throne.
 year: 2026
 tags: [dark, glitch, sci-fi]
 featured: true
-order: 7
+order: 8
 objectPosition: 50% 10%
 ---

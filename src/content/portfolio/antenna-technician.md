@@ -8,6 +8,6 @@ alt: A sci-fi city with a futuristic technician standing in the foreground holdi
 year: 2026
 tags: [sci-fi, character, city]
 featured: true
-order: 8
+order: 9
 objectPosition: 50% 25%
 ---

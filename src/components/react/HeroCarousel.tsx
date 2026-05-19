@@ -19,12 +19,15 @@ interface Slide {
 interface Props {
   slides: Slide[];
   sizes: string;
+  autoPlay?: boolean;
+  duration?: number; // ms per slide
 }
 
 const STORAGE_KEY = 'hero-carousel-index';
 
-export default function HeroCarousel({ slides, sizes }: Props) {
+export default function HeroCarousel({ slides, sizes, autoPlay = true, duration = 5000 }: Props) {
   const [current, setCurrent] = useState(0);
+  const [playing, setPlaying] = useState(autoPlay);
   // Skip the opacity transition on the very first paint after mount — otherwise restoring the
   // saved index (e.g. after browser back from a painting page) fades from slide 0 to the
   // restored slide, which looks like a jitter.
@@ -70,6 +73,14 @@ export default function HeroCarousel({ slides, sizes }: Props) {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [prev, next]);
+
+  // Auto-advance — setTimeout so the countdown resets naturally whenever `current` changes,
+  // whether from auto-advance or manual navigation. Paused while hovered or playing=false.
+  useEffect(() => {
+    if (!playing || slides.length <= 1) return;
+    const id = setTimeout(() => setCurrent(i => (i + 1) % slides.length), duration);
+    return () => clearTimeout(id);
+  }, [playing, current, slides.length, duration]);
 
   // Swipe handling — track horizontal drag; cancel the wrapping <a>'s click if the gesture
   // was a swipe rather than a tap.
@@ -182,7 +193,7 @@ export default function HeroCarousel({ slides, sizes }: Props) {
             →
           </button>
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2.5 bg-black/50 rounded-full px-3 py-2">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2.5 bg-black/50 rounded-full px-3 py-2">
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -194,6 +205,23 @@ export default function HeroCarousel({ slides, sizes }: Props) {
                 }`}
               />
             ))}
+            <span className="w-px h-3 bg-white/25 mx-0.5" aria-hidden="true" />
+            <button
+              onClick={() => setPlaying(p => !p)}
+              aria-label={playing ? 'Pause auto-play' : 'Resume auto-play'}
+              className="flex items-center justify-center w-3 h-3 text-white/70 hover:text-white transition-colors"
+            >
+              {playing ? (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                  <rect x="1" y="1" width="3" height="8" rx="0.5" />
+                  <rect x="6" y="1" width="3" height="8" rx="0.5" />
+                </svg>
+              ) : (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                  <path d="M2 1.5 L9 5 L2 8.5 Z" />
+                </svg>
+              )}
+            </button>
           </div>
         </>
       )}
