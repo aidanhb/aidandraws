@@ -6,6 +6,7 @@ import Portfolio from '../components/Portfolio.astro';
 import About from '../components/About.astro';
 import Books from '../components/Books.astro';
 import Footer from '../components/Footer.astro';
+import Awards from '../components/Awards.astro';
 import { getHeroSlides, HERO_SIZES } from '../lib/hero-slides';
 
 const slides = await getHeroSlides();
@@ -29,6 +30,8 @@ const heroPreload = first
         <a href="mailto:aidan@aidandraws.com" class=" underline hover:no-underline">aidan@aidandraws.com</a>
       </p>
     </section>
+
+    <Awards />
 
     <section id="portfolio" class="py-16 scroll-mt-20">
       <Portfolio />
