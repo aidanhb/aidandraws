@@ -7,6 +7,7 @@ import About from '../components/About.astro';
 import Books from '../components/Books.astro';
 import Footer from '../components/Footer.astro';
 import Awards from '../components/Awards.astro';
+import Testimonials from '../components/Testimonials.astro';
 import { getHeroSlides, HERO_SIZES } from '../lib/hero-slides';
 
 const slides = await getHeroSlides();
@@ -32,6 +33,7 @@ const heroPreload = first
     </section>
 
     <Awards />
+    <Testimonials />
 
     <section id="portfolio" class="py-16 scroll-mt-20">
       <Portfolio />
