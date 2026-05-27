@@ -6,8 +6,7 @@ import Portfolio from '../components/Portfolio.astro';
 import About from '../components/About.astro';
 import Books from '../components/Books.astro';
 import Footer from '../components/Footer.astro';
-import Awards from '../components/Awards.astro';
-import Testimonials from '../components/Testimonials.astro';
+import Intro from '../components/Intro.astro';
 import { getHeroSlides, HERO_SIZES } from '../lib/hero-slides';
 
 const slides = await getHeroSlides();
@@ -23,17 +22,7 @@ const heroPreload = first
   <main>
     <Hero slides={slides} />
 
-    <section class="text-center text-xl max-w-300 mx-auto px-6 py-8 mt-4 border border-text-title/50 rounded-full">
-      <p class="text-3xl font-heading text-text-title uppercase tracking-widest mb-2">Hi! I'm Aidan Holloway-Bidwell</p>
-      <p class="text-text-title" >Do you need artwork for your project? I do commissions, let's work together.</p>
-      <p class="text-text-secondary">
-        Send me an email at{' '}
-        <a href="mailto:aidan@aidandraws.com" class=" underline hover:no-underline">aidan@aidandraws.com</a>
-      </p>
-    </section>
-
-    <Awards />
-    <Testimonials />
+    <Intro />
 
     <section id="portfolio" class="py-16 scroll-mt-20">
       <Portfolio />
