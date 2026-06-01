@@ -1,0 +1,13 @@
+---
+interface Props {
+  quote: string;
+  credit: string;
+}
+
+const { quote, credit } = Astro.props;
+---
+
+<blockquote class="flex flex-col gap-2">
+  <p class="italic leading-relaxed text-text">"{quote}"</p>
+  <footer class="text-sm text-text-secondary">&mdash; {credit}</footer>
+</blockquote>

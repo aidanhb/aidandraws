@@ -1,0 +1,31 @@
+---
+import Award from './Award.astro';
+import si67Raw from '../assets/svg/society_of_illustrators_67.svg?raw';
+import cq79Raw from '../assets/svg/creative_quarterly_79.svg?raw';
+
+function processAwardSvg(raw: string): string {
+  return raw
+    .replace(/<svg\b([^>]*)>/, (_, attrs) => `<svg${attrs} fill="currentColor">`)
+    .replace('.cls-1{fill:#fff;}', '.cls-1{fill:var(--color-bg);}');
+}
+
+const si67Svg = processAwardSvg(si67Raw);
+const cq79Svg = processAwardSvg(cq79Raw);
+---
+
+<div class="flex flex-wrap justify-center items-end gap-2">
+  <Award
+    title="Illustrators 67"
+    subtitle="Jury Selection"
+    href="https://societyillustrators.org/"
+    logoHtml={si67Svg}
+    logoHeight="h-16"
+  />
+  <Award
+    title="Creative Quarterly 79"
+    subtitle="Honorable Mention"
+    href="https://www.cqjournal.com/gallery/79/gallery/holloway-bidwell-aidan-113739-01"
+    logoHtml={cq79Svg}
+    logoHeight="h-12"
+  />
+</div>

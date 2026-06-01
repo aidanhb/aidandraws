@@ -1,0 +1,24 @@
+---
+interface Props {
+  title: string;
+  subtitle: string;
+  href?: string;
+  logoHtml: string;
+  logoHeight?: string;
+}
+
+const { title, subtitle, href, logoHtml, logoHeight = 'h-12' } = Astro.props;
+---
+
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="flex flex-col items-center justify-end gap-3 text-text-secondary no-underline hover:opacity-70 transition-opacity p-3 w-68 h-36 text-center"
+>
+  <div class={`${logoHeight} shrink-0 [&>svg]:h-full [&>svg]:w-auto`} set:html={logoHtml} />
+  <div class="no-p-gap w-full">
+    <p class="font-heading text-s uppercase tracking-widest leading-tight">{title}</p>
+    <p class="font-body text-xs uppercase tracking-widest leading-tight">{subtitle}</p>
+  </div>
+</a>
