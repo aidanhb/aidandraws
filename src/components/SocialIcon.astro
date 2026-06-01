@@ -16,7 +16,7 @@ const { platform, size = 20 } = Astro.props;
 
 const META: Record<Platform, { href: string; label: string; external: boolean }> = {
   instagram: { href: 'https://www.instagram.com/aidan_thats_me/', label: 'Instagram', external: true  },
-  email:     { href: 'mailto:aidan@aidandraws.com',               label: 'Email',     external: false },
+  email:     { href: 'mailto:aidan@aidandraws.com',               label: 'Email',     external: true  },
 };
 
 const { href, label, external } = META[platform];
