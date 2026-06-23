@@ -1,0 +1,56 @@
+---
+import { SparklesIcon } from '@heroicons/react/24/solid';
+
+interface Props {
+  purchaseUrl: string;
+  price?: string;
+  pitch?: string;
+  numPages?: number;
+  dimensions?: string;
+  binding?: string;
+  bindingStyle?: string;
+  print?: string;
+  stock?: string;
+}
+
+const { purchaseUrl, price, pitch, numPages, dimensions, binding, bindingStyle, print, stock } = Astro.props;
+
+const specs = [
+  dimensions && { label: 'Size', value: dimensions },
+  print && { label: 'Print', value: print },
+  binding && { label: 'Cover', value: binding },
+  numPages && { label: 'Pages', value: `${numPages}` },
+  stock && { label: 'Paper', value: stock },
+  bindingStyle && { label: 'Binding', value: bindingStyle },
+].filter(Boolean) as { label: string; value: string }[];
+---
+
+<div class="flex flex-col gap-6">
+  {pitch && (
+    <p class="font-body text-p2 text-text !mt-0 !mb-0 flex items-center gap-1.5">
+      <SparklesIcon className="size-4 text-text-title flex-none" aria-hidden="true" />
+      {pitch}
+    </p>
+  )}
+  <div class="flex flex-col sm:flex-row sm:items-end gap-6">
+    <div class="flex-none flex flex-col items-start gap-2">
+      {price && <p class="font-heading text-h4 text-text-title">{price}</p>}
+      <a
+        href={purchaseUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-text-link text-bg font-heading font-bold uppercase tracking-widest px-6 pb-2.5 pt-3.5 rounded-full no-underline hover:opacity-70 transition-opacity whitespace-nowrap"
+      >
+        Pre-order a signed copy
+      </a>
+    </div>
+    <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-3">
+      {specs.map(({ label, value }) => (
+        <div>
+          <p class="font-heading uppercase tracking-wider text-p3 text-text-secondary !mb-0">{label}</p>
+          <p class="font-body text-p2 text-text !mt-0">{value}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
