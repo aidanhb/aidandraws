@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { SwatchIcon } from '@heroicons/react/24/outline';
 import { THEMES, DEFAULT_THEME, STORAGE_KEY, type ThemeId } from '../../lib/themes';
 
 interface Props {
@@ -136,7 +137,7 @@ export default function ThemePicker({ portraits }: Props) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <PaletteIcon />
+          <SwatchIcon className="w-5 h-5" aria-hidden="true" />
         )}
       </button>
 
@@ -193,7 +194,7 @@ export default function ThemePicker({ portraits }: Props) {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-text/30">
-                        <PaletteIcon size={20} />
+                        <SwatchIcon className="w-5 h-5" aria-hidden="true" />
                       </div>
                     )}
                   </div>
@@ -207,27 +208,5 @@ export default function ThemePicker({ portraits }: Props) {
         </div>
       </div>
     </div>
-  );
-}
-
-function PaletteIcon({ size = 18 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" stroke="none" />
-      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" stroke="none" />
-      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" stroke="none" />
-      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" stroke="none" />
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
-    </svg>
   );
 }

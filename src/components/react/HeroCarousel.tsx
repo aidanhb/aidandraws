@@ -1,4 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import { PauseIcon, PlayIcon } from '@heroicons/react/24/solid';
 
 // useLayoutEffect warns when run on the server. Astro SSRs this component, so fall back to
 // useEffect on the server side — the restore only needs to run on the client anyway.
@@ -212,14 +213,9 @@ export default function HeroCarousel({ slides, sizes, autoPlay = true, duration 
               className="flex items-center justify-center w-3 h-3 text-white/70 hover:text-white transition-colors"
             >
               {playing ? (
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
-                  <rect x="1" y="1" width="3" height="8" rx="0.5" />
-                  <rect x="6" y="1" width="3" height="8" rx="0.5" />
-                </svg>
+                <PauseIcon className="w-3 h-3" aria-hidden="true" />
               ) : (
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
-                  <path d="M2 1.5 L9 5 L2 8.5 Z" />
-                </svg>
+                <PlayIcon className="w-3 h-3" aria-hidden="true" />
               )}
             </button>
           </div>

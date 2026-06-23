@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface Link {
   label: string;
@@ -50,16 +51,9 @@ export default function MobileMenu({ links }: Props) {
         className="p-1 text-text/70 hover:text-text transition-colors"
       >
         {open ? (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <XMarkIcon className="size-6" aria-hidden="true" />
         ) : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-            <line x1="3" y1="7" x2="21" y2="7" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="17" x2="21" y2="17" />
-          </svg>
+          <Bars3Icon className="size-6" aria-hidden="true" />
         )}
       </button>
 
